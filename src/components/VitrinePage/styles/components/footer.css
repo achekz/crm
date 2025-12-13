@@ -1,0 +1,209 @@
+/* Footer */
+.vitrine-page .main-footer {
+  max-width: 1400px;
+  margin: 6rem auto;
+  padding: 5rem 3rem;
+  background: linear-gradient(135deg, rgba(74, 107, 106, 0.95) 0%, rgba(63, 90, 89, 0.95) 100%);
+  border-radius: 2rem;
+  box-shadow: 0 20px 50px rgba(74, 107, 106, 0.2);
+  position: relative;
+  overflow: hidden;
+  color: var(--color-sand-light);
+}
+
+.vitrine-page .main-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-sand), transparent);
+}
+
+.vitrine-page .main-footer::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-sand), transparent);
+}
+
+.vitrine-page .footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 4rem;
+  max-width: 1200px;
+  margin: 0 auto 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.vitrine-page .company-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.vitrine-page .footer-logo {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 2rem;
+  transition: transform 0.4s ease;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  border-radius: 20px;
+  background-color: var(--color-bg-lightest);
+  padding: 12px;
+  object-fit: cover;
+}
+
+.vitrine-page .footer-logo:hover {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.vitrine-page .company-description {
+  font-size: 1rem;
+  line-height: 1.8;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+  max-width: 400px;
+}
+
+.vitrine-page .footer-heading {
+  font-family: "Merriweather", serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+}
+
+.vitrine-page .footer-heading::after {
+  content: '';
+  position: absolute;
+  bottom: -0.75rem;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: var(--color-sand);
+  border-radius: 3px;
+}
+
+.vitrine-page .services-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.vitrine-page .services-list li {
+  margin-bottom: 1rem;
+}
+
+.vitrine-page .services-list a {
+  color: var(--color-sand-light);
+  text-decoration: none;
+  transition: all 0.4s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+}
+
+.vitrine-page .services-list a:hover {
+  color: white;
+  transform: translateX(8px);
+  background: rgba(255, 255, 255, 0.1);
+  padding-left: 1rem;
+}
+
+.vitrine-page .contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.vitrine-page .contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  font-size: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.vitrine-page .contact-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.vitrine-page .contact-item svg {
+  color: var(--color-sand);
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.vitrine-page .contact-item a {
+  color: var(--color-sand-light);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.vitrine-page .contact-item a:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+.vitrine-page .social-icons {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.vitrine-page .social-link {
+  color: var(--color-sand);
+  font-size: 1.4rem;
+  transition: all 0.4s ease;
+  background: rgba(255, 255, 255, 0.1);
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  text-decoration: none;
+}
+
+.vitrine-page .social-link:hover {
+  color: var(--color-accent);
+  background: var(--color-sand);
+  transform: translateY(-5px) scale(1.1);
+  border-color: var(--color-sand);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.vitrine-page .copyright {
+  text-align: center;
+  padding-top: 3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-sand);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.vitrine-page .copyright a {
+  color: var(--color-sand);
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.vitrine-page .copyright a:hover {
+  color: white;
+}

@@ -1,0 +1,156 @@
+/* Stats Section */
+.vitrine-page .stats-section {
+  padding: 5rem 2rem;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.vitrine-page .stats-background {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(74, 107, 106, 0.05) 0%, rgba(74, 107, 106, 0.02) 100%);
+}
+
+.vitrine-page .stats-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 25% 25%, rgba(74, 107, 106, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 75% 75%, rgba(74, 107, 106, 0.1) 0%, transparent 50%);
+  animation: float 20s ease-in-out infinite;
+}
+
+.vitrine-page .stats-section.animate-in {
+  animation: fadeIn 1s ease-out;
+}
+
+.vitrine-page .stats-content {
+  position: relative;
+  z-index: 2;
+}
+
+.vitrine-page .stats-title {
+  font-family: "Merriweather", "Poppins", serif;
+  font-size: 4rem;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 5rem;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.vitrine-page .stats-title span {
+  position: relative;
+  padding: 0 1.5rem;
+  transition: all 0.4s ease;
+}
+
+.vitrine-page .stats-title span:nth-child(1) {
+  color: var(--color-accent);
+}
+
+.vitrine-page .stats-title span:nth-child(2) {
+  color: #2f4443;
+}
+
+.vitrine-page .stats-title span:nth-child(3) {
+  color: #3f5a59;
+}
+
+.vitrine-page .stats-title span::after {
+  content: '';
+  position: absolute;
+  bottom: -1rem;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: currentColor;
+  transform: scaleX(0);
+  transition: transform 0.5s ease;
+  border-radius: 2px;
+}
+
+.vitrine-page .stats-title span:hover::after {
+  transform: scaleX(1);
+}
+
+.vitrine-page .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.vitrine-page .stat-item {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 1.5rem;
+  padding: 3rem;
+  transition: all 0.5s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(74, 107, 106, 0.1);
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.vitrine-page .stat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-sand));
+  transform: scaleX(0);
+  transition: transform 0.6s ease;
+}
+
+.vitrine-page .stat-item:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.vitrine-page .stat-item:hover::before {
+  transform: scaleX(1);
+}
+
+.vitrine-page .stat-icon {
+  color: var(--color-accent);
+  margin-bottom: 1.5rem;
+  transition: all 0.4s ease;
+}
+
+.vitrine-page .stat-item:hover .stat-icon {
+  transform: scale(1.2) rotate(10deg);
+  color: var(--color-accent-dark);
+}
+
+.vitrine-page .stat-number {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+  color: var(--color-accent);
+  font-weight: 900;
+  font-family: "Merriweather", serif;
+  line-height: 1;
+}
+
+.vitrine-page .stat-label {
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: var(--color-text);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.vitrine-page .stat-description {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  opacity: 0.7;
+  line-height: 1.5;
+}

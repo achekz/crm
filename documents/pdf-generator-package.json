@@ -1,0 +1,16 @@
+{
+  "name": "pdf-generator",
+  "version": "1.0.0",
+  "description": "Générateur de PDF pour les notes d'honoraires",
+  "main": "generate-pdfs.js",
+  "scripts": {
+    "generate": "node generate-pdfs.js",
+    "install-deps": "npm install puppeteer"
+  },
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  },
+  "keywords": ["pdf", "html", "puppeteer"],
+  "author": "Zied El Achek",
+  "license": "MIT"
+} 

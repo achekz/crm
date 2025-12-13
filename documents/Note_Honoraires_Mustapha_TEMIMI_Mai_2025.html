@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note d'Honoaires - Mai 2025</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fff;
+        }
+        
+        .container {
+            max-width: 210mm;
+            margin: 10px auto;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 8px;
+        }
+        
+        .header-left h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 3px;
+            color: #333;
+        }
+        
+        .header-left p {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .header-right {
+            text-align: right;
+        }
+        
+        .invoice-number {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .invoice-date {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .section {
+            margin-bottom: 6px;
+        }
+        
+        .section h2 {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 3px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .info-item {
+            padding: 1px 0;
+            font-size: 9px;
+        }
+        
+        .info-item strong {
+            display: block;
+            margin-bottom: 1px;
+            font-weight: 500;
+        }
+        
+        .services-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 10px;
+        }
+        
+        .services-table th {
+            background: #f8f8f8;
+            padding: 6px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #ddd;
+        }
+        
+        .services-table td {
+            padding: 6px;
+            border: 1px solid #ddd;
+        }
+        
+        .total-section {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .total-row:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .footer {
+            margin-top: 15px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            padding-top: 8px;
+        }
+        
+        .footer p {
+            margin: 2px 0;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .stamp-area {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .stamp-box {
+            width: 120px;
+            height: 60px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+        }
+        
+        .payment-info {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 20px 0;
+            background: #f9f9f9;
+        }
+        
+        .payment-info h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .payment-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .payment-info li {
+            margin: 5px 0;
+            padding-left: 20px;
+            position: relative;
+            font-size: 12px;
+        }
+        
+        .payment-info li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>NOTE D'HONORAIRES</h1>
+                <p>Contrat de Développement Informatique et Prestation de Services</p>
+            </div>
+            <div class="header-right">
+                <div class="invoice-number">NH-2025-002</div>
+                <div class="invoice-date">30 Mai 2025</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="left-column">
+                <div class="section">
+                    <h2>Informations de Facturation</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Période de facturation:</strong>
+                            1er - 31 Mai 2025
+                        </div>
+                        <div class="info-item">
+                            <strong>Échéance de paiement:</strong>
+                            30 Mai 2025
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Prestataire de Services</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Nom:</strong>
+                            M. Zied El Achek
+                        </div>
+                        <div class="info-item">
+                            <strong>Profession:</strong>
+                            Développeur Web et Logiciel
+                        </div>
+                        <div class="info-item">
+                            <strong>Adresse:</strong>
+                            35 Rue Tariq Ibn Ziyad<br>
+                            Sayada, Monastir
+                        </div>
+                        <div class="info-item">
+                            <strong>Identifiant Fiscal:</strong>
+                            CIN: 14034277
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Client</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Nom:</strong>
+                            M. Mustapha TEMIMI
+                        </div>
+                        <div class="info-item">
+                            <strong>Fonction:</strong>
+                            Propriétaire, Fondateur et Gérant
+                        </div>
+                        <div class="info-item">
+                            <strong>Entreprise:</strong>
+                            Cabinet Comptable CMT
+                        </div>
+                        <div class="info-item">
+                            <strong>Adresse Professionnelle:</strong>
+                            134, Quartier 6<br>
+                            5000 Monastir
+                        </div>
+                        <div class="info-item">
+                            <strong>Registre National:</strong>
+                            1420191T
+                        </div>
+                        <div class="info-item">
+                            <strong>Identifiant Fiscal:</strong>
+                            CIN: 06811366
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Références Contractuelles</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Contrat Principal:</strong>
+                            Contrat de Développement Informatique et Prestation de Services
+                        </div>
+                        <div class="info-item">
+                            <strong>Date du contrat:</strong>
+                            1er Avril 2025
+                        </div>
+                        <div class="info-item">
+                            <strong>Durée totale:</strong>
+                            10 mois (1er Avril 2025 - 31 Janvier 2026)
+                        </div>
+                        <div class="info-item">
+                            <strong>Montant total du contrat:</strong>
+                            5.000 TND
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="section">
+                    <h2>Services Rendu - Mai 2025</h2>
+                    <table class="services-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Détails</th>
+                                <th>Montant (TND)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Finalisation des spécifications techniques</strong></td>
+                                <td>
+                                    • Finalisation de l'Annexe 1 - Spécifications techniques détaillées<br>
+                                    • Validation conjointe des spécifications<br>
+                                    • Préparation du développement du site web<br>
+                                    • Planification de l'architecture technique
+                                </td>
+                                <td>500,00</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Début du développement du site web</strong></td>
+                                <td>
+                                    • Mise en place de l'environnement de développement<br>
+                                    • Création de la structure de base du site web<br>
+                                    • Développement des premières pages<br>
+                                    • Intégration du design et de l'interface utilisateur
+                                </td>
+                                <td>0,00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="total-section">
+                    <div class="total-row">
+                        <span>Montant HT:</span>
+                        <span>500,00 TND</span>
+                    </div>
+                    <div class="total-row">
+                        <span><strong>Montant TTC:</strong></span>
+                        <span><strong>500,00 TND</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stamp-area">
+            <div class="stamp-box">
+                Cachet et signature<br>
+                du Prestataire
+            </div>
+            <div class="stamp-box">
+                Cachet et signature<br>
+                du Client
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>M. Zied El Achek</strong> - Développeur Web et Logiciel</p>
+            <p>35 Rue Tariq Ibn Ziyad, Sayada, Monastir | CIN: 14034277</p>
+            <p>Note d'honoraires conforme à la législation tunisienne en vigueur</p>
+        </div>
+    </div>
+</body>
+</html> 

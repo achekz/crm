@@ -1,0 +1,12 @@
+email,password,name,role,company,avatar
+admin.tunisia@email.com,admin123,Admin Tunisia,admin,Tunisian ERP,
+ahmed.benali@email.com,azerty123,Ahmed Ben Ali,client,Carthage Consulting,
+fatma.trabelsi@email.com,azerty123,Fatma Trabelsi,client,Tunisian Tech,
+mohamed.bouazizi@email.com,azerty123,Mohamed Bouazizi,client,Startup TN,
+syrine.gharsalli@email.com,azerty123,Syrine Gharsalli,client,Medina Digital,
+youssef.mhiri@email.com,azerty123,Youssef Mhiri,client,Olive Solutions,
+imen.chahed@email.com,azerty123,Imen Chahed,client,Sahel Services,
+khalil.jaziri@email.com,azerty123,Khalil Jaziri,client,Atlas Group,
+rim.benjemaa@email.com,azerty123,Rim Ben Jemaa,client,El Mourouj Agency,
+sami.benromdhane@email.com,azerty123,Sami Ben Romdhane,client,North Africa IT,
+ons.benammar@email.com,azerty123,Ons Ben Ammar,client,Monastir Media, 

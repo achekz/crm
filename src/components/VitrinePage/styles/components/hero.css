@@ -1,0 +1,247 @@
+/* Hero Section */
+.vitrine-page .hero-section {
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+  min-height: 600px;
+  background-color: var(--color-bg-light);
+  margin-top: 10rem;
+}
+
+.vitrine-page .hero-carousel {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.vitrine-page .hero-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 1.5s ease, transform 2s ease;
+  z-index: 1;
+  transform: scale(1.1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.vitrine-page .hero-slide.active {
+  opacity: 1;
+  z-index: 2;
+  transform: scale(1);
+}
+
+.vitrine-page .hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(74, 107, 106, 0.9) 0%, rgba(74, 107, 106, 0.7) 50%, rgba(74, 107, 106, 0.5) 100%);
+}
+
+.vitrine-page .hero-content {
+  position: relative;
+  z-index: 5;
+  max-width: 700px;
+  padding: 0 2rem;
+  margin-left: var(--space-12);
+  animation: slideInUp 1s ease-out;
+}
+
+.vitrine-page .hero-title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: var(--color-sand);
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  display: inline-block;
+  animation: slideInUp 1s ease-out;
+}
+
+.vitrine-page .hero-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -0.5rem;
+  height: 4px;
+  width: 8rem;
+  background: linear-gradient(90deg, var(--color-sand), rgba(217, 201, 172, 0.5));
+  border-radius: 3px;
+  animation: expandWidth 1.5s ease-out 0.5s both;
+}
+
+.vitrine-page .hero-subtitle {
+  font-size: 1.35rem;
+  color: #fff;
+  margin-bottom: 2.5rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  max-width: 580px;
+  line-height: 1.6;
+  animation: slideInUp 1s ease-out 0.3s both;
+}
+
+.vitrine-page .hero-features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.vitrine-page .hero-feature {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-base);
+  font-weight: 500;
+}
+
+.vitrine-page .hero-feature svg {
+  color: var(--color-sand);
+  flex-shrink: 0;
+}
+
+.vitrine-page .hero-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.vitrine-page .cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 1rem 2.5rem;
+  border-radius: 3rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  text-decoration: none;
+  animation: slideInUp 1s ease-out 0.6s both;
+  cursor: pointer;
+}
+
+.vitrine-page .cta-button.primary {
+  background: linear-gradient(135deg, var(--color-sand) 0%, #e9dcc7 100%);
+  color: var(--color-accent-dark);
+}
+
+.vitrine-page .cta-button.primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--color-accent-dark) 0%, var(--color-accent) 100%);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s ease;
+  z-index: -1;
+}
+
+.vitrine-page .cta-button.primary:hover {
+  color: var(--color-sand);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+  border-color: var(--color-sand);
+}
+
+.vitrine-page .cta-button.primary:hover::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.vitrine-page .cta-button.secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.vitrine-page .cta-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.vitrine-page .cta-button svg {
+  transition: transform 0.3s ease;
+}
+
+.vitrine-page .cta-button:hover svg {
+  transform: translateX(6px);
+}
+
+/* Carousel Controls */
+.vitrine-page .carousel-controls {
+  position: absolute;
+  bottom: 2rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  z-index: 10;
+}
+
+.vitrine-page .carousel-dots {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.vitrine-page .carousel-dot {
+  height: 0.3rem;
+  width: 2rem;
+  background-color: rgba(217, 201, 172, 0.4);
+  border-radius: 1rem;
+  transition: all 0.4s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.vitrine-page .carousel-dot:hover {
+  background-color: rgba(217, 201, 172, 0.7);
+  transform: scale(1.1);
+}
+
+.vitrine-page .carousel-dot.active {
+  background-color: var(--color-sand);
+  width: 3rem;
+  box-shadow: 0 0 10px rgba(217, 201, 172, 0.5);
+}
+
+.vitrine-page .carousel-prev,
+.vitrine-page .carousel-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--color-sand);
+  border: 2px solid var(--color-sand);
+  border-radius: 50%;
+  transition: all 0.4s ease;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.vitrine-page .carousel-prev:hover,
+.vitrine-page .carousel-next:hover {
+  background-color: var(--color-sand);
+  color: var(--color-accent-dark);
+  transform: translateY(-3px) scale(1.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}

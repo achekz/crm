@@ -1,0 +1,192 @@
+/* Enhanced Navigation */
+.vitrine-page .main-navigation {
+  position: fixed;
+  top: 9.5rem; /* Increased from 6.5rem to avoid header overlap */
+  left: 0;
+  right: 0;
+  z-index: 998;
+  background: linear-gradient(90deg, var(--color-accent) 0%, #3f5a59 100%);
+  box-shadow: 0 4px 20px rgba(74, 107, 106, 0.3);
+  width: 100%;
+  height: auto;
+  min-height: 3.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-bottom: 2px solid rgba(217, 201, 172, 0.3);
+  transform: translateY(0);
+}
+
+.vitrine-page .main-navigation.scrolled {
+  top: 7rem; /* Increased from 6rem to ensure no overlap when scrolled */
+  background: linear-gradient(90deg, rgba(74, 107, 106, 0.95), rgba(63, 90, 89, 0.95));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.vitrine-page .main-navigation.hidden {
+  transform: translateY(-150%);
+  box-shadow: none;
+}
+
+.vitrine-page .nav-menu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  padding: 0.75rem;
+  margin: 0;
+  list-style: none;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.vitrine-page .nav-menu li {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.vitrine-page .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.75rem 1.25rem;
+  font-family: "Merriweather", "Poppins", serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-sand);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  white-space: nowrap;
+  text-decoration: none;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.vitrine-page .nav-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: var(--radius-lg);
+}
+
+.vitrine-page .nav-link:hover::before {
+  opacity: 1;
+}
+
+.vitrine-page .nav-link:hover {
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.vitrine-page .dropdown-trigger .dropdown-arrow {
+  transition: var(--transition-default);
+}
+
+.vitrine-page .dropdown-trigger .dropdown-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.vitrine-page .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: rgba(74, 107, 106, 0.98);
+  min-width: 220px;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 1000;
+  list-style: none;
+  padding: 0.75rem 0;
+  margin: 0;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vitrine-page .dropdown-menu.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.vitrine-page .dropdown-link {
+  display: block;
+  padding: 0.875rem 1.25rem;
+  color: var(--color-sand);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+  font-size: var(--font-sm);
+  border-radius: 0;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+
+.vitrine-page .dropdown-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.vitrine-page .dropdown-link:hover::before {
+  opacity: 1;
+}
+
+.vitrine-page .dropdown-link:hover,
+.vitrine-page .dropdown-link:focus {
+  color: white;
+  border-left-color: var(--color-sand);
+  padding-left: 1.75rem;
+  transform: translateX(4px);
+}
+
+.vitrine-page .mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 13rem; /* Updated from 10rem to align with new navigation position */
+  right: var(--space-6);
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-xl);
+  width: 3.5rem;
+  height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1001;
+  box-shadow: 0 4px 20px rgba(74, 107, 106, 0.4);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.vitrine-page .mobile-menu-btn.scrolled {
+  top: 10.5rem; /* Updated from 9.5rem to align with scrolled navigation */
+}
+
+.vitrine-page .mobile-menu-btn:hover {
+  background: linear-gradient(135deg, var(--color-accent-dark) 0%, var(--color-accent) 100%);
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 8px 25px rgba(74, 107, 106, 0.5);
+}

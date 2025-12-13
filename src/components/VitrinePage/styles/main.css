@@ -1,0 +1,11 @@
+/* Import all component styles */
+@import './base.css';
+@import './components/header.css';
+@import './components/navigation.css';
+@import './components/hero.css';
+@import './components/services.css';
+@import './components/stats.css';
+@import './components/testimonials.css';
+@import './components/contact.css';
+@import './components/footer.css';
+@import './responsive.css';

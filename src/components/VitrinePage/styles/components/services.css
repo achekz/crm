@@ -1,0 +1,467 @@
+/* Services Section */
+.vitrine-page .services-section {
+  padding: var(--space-12) var(--space-6);
+  background: linear-gradient(180deg, var(--color-bg-light) 0%, #f8f7f5 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.vitrine-page .services-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-sand));
+}
+
+.vitrine-page .services-bg-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(74, 107, 106, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(217, 201, 172, 0.05) 0%, transparent 50%);
+  background-size: 80% 80%;
+  background-position: center;
+  z-index: 1;
+}
+
+.vitrine-page .services-section .container {
+  position: relative;
+  z-index: 2;
+}
+
+.vitrine-page .services-section.section-visible .section-header {
+  animation: fadeInDown 0.8s ease-out;
+}
+
+/* Service Filters */
+.vitrine-page .service-filters {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.vitrine-page .filter-btn {
+  background: transparent;
+  border: 1px solid rgba(74, 107, 106, 0.2);
+  color: var(--color-text);
+  padding: 0.75rem 1.5rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.vitrine-page .filter-btn:hover {
+  background: rgba(74, 107, 106, 0.05);
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+.vitrine-page .filter-btn.active {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(74, 107, 106, 0.3);
+}
+
+/* Services Grid */
+.vitrine-page .services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: auto;
+  gap: var(--space-6);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-8) 0;
+}
+
+/* Service Card */
+.vitrine-page .service-card {
+  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid rgba(217, 201, 172, 0.2);
+  transform: translateY(40px);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.vitrine-page .service-card-inner {
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+}
+
+.vitrine-page .service-card.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vitrine-page .service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-sand));
+  transform: scaleX(0);
+  transition: transform 0.6s ease;
+}
+
+.vitrine-page .service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.vitrine-page .service-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Service Icon */
+.vitrine-page .service-icon-wrapper {
+  position: relative;
+  margin-bottom: var(--space-6);
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vitrine-page .service-icon {
+  transition: all 0.5s ease;
+  color: var(--color-accent);
+  z-index: 2;
+  position: relative;
+}
+
+.vitrine-page .service-icon-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(74, 107, 106, 0.1) 0%, rgba(74, 107, 106, 0.05) 100%);
+  border-radius: 50%;
+  transform: scale(0.8);
+  transition: all 0.5s ease;
+}
+
+.vitrine-page .service-card:hover .service-icon {
+  transform: scale(1.2) rotate(10deg);
+  color: var(--color-accent-dark);
+}
+
+.vitrine-page .service-card:hover .service-icon-bg {
+  transform: scale(1.2);
+  background: linear-gradient(135deg, rgba(74, 107, 106, 0.2) 0%, rgba(74, 107, 106, 0.1) 100%);
+}
+
+/* Service Rating */
+.vitrine-page .service-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.vitrine-page .star-icon {
+  color: #FFB800;
+}
+
+.vitrine-page .rating-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* Service Title */
+.vitrine-page .service-title {
+  font-family: "Merriweather", "Poppins", serif;
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+  position: relative;
+}
+
+.vitrine-page .service-title::after {
+  content: '';
+  position: absolute;
+  bottom: -0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-sand));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.vitrine-page .service-card:hover .service-title::after {
+  width: 80px;
+}
+
+/* Service Description */
+.vitrine-page .service-description {
+  font-size: var(--font-base);
+  color: var(--color-text);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-5);
+  opacity: 0.9;
+  flex-grow: 1;
+}
+
+/* Service Features */
+.vitrine-page .service-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: var(--space-5);
+}
+
+.vitrine-page .feature-tag {
+  background: linear-gradient(135deg, rgba(74, 107, 106, 0.1) 0%, rgba(74, 107, 106, 0.05) 100%);
+  color: var(--color-accent-dark);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(74, 107, 106, 0.2);
+  transition: all 0.3s ease;
+}
+
+.vitrine-page .service-card:hover .feature-tag {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Service button */
+.vitrine-page .service-btn {
+  margin-top: auto;
+  padding: var(--space-4) var(--space-6);
+  background: transparent;
+  border: 2px solid var(--color-accent);
+  color: var(--color-accent);
+  border-radius: 2rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.4s ease;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vitrine-page .service-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s ease;
+  z-index: -1;
+}
+
+.vitrine-page .service-btn:hover {
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(74, 107, 106, 0.3);
+}
+
+.vitrine-page .service-btn:hover::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Service details */
+.vitrine-page .service-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  opacity: 0;
+  transform: translateY(-20px);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 0 0 1.5rem 1.5rem;
+  width: 100%;
+  padding: 0 var(--space-5);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(217, 201, 172, 0.2);
+}
+
+.vitrine-page .service-details.expanded {
+  max-height: 800px;
+  opacity: 1;
+  transform: translateY(0);
+  padding: var(--space-6) var(--space-5);
+}
+
+.vitrine-page .service-details h4 {
+  color: var(--color-accent-dark);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-xl);
+  font-weight: 700;
+}
+
+.vitrine-page .service-details p {
+  font-size: var(--font-base);
+  margin-bottom: var(--space-4);
+  line-height: 1.7;
+}
+
+.vitrine-page .service-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-6) 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.vitrine-page .service-list li {
+  position: relative;
+  padding-left: 2rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+}
+
+.vitrine-page .service-list .check-icon {
+  position: absolute;
+  left: 0;
+  top: 0.1rem;
+  color: var(--color-accent);
+  background: rgba(74, 107, 106, 0.1);
+  border-radius: 50%;
+  padding: 2px;
+}
+
+/* Service CTAs */
+.vitrine-page .service-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.vitrine-page .service-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border-radius: 2rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: all 0.4s ease;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.vitrine-page .service-cta.primary {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: white;
+  border: none;
+}
+
+.vitrine-page .service-cta.secondary {
+  background: transparent;
+  color: var(--color-accent-dark);
+  border: 2px solid var(--color-accent);
+}
+
+.vitrine-page .service-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(74, 107, 106, 0.25);
+}
+
+.vitrine-page .service-cta:hover svg {
+  transform: translateX(4px);
+}
+
+/* Services Footer */
+.vitrine-page .services-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px dashed rgba(74, 107, 106, 0.2);
+}
+
+.vitrine-page .services-note {
+  font-size: 1.1rem;
+  color: var(--color-text);
+  max-width: 700px;
+  opacity: 0.9;
+}
+
+.vitrine-page .services-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: white;
+  border-radius: 2rem;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.4s ease;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(74, 107, 106, 0.25);
+}
+
+.vitrine-page .services-contact-link:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(74, 107, 106, 0.35);
+}
+
+.vitrine-page .services-contact-link:hover svg {
+  transform: translateX(4px);
+}
+
+.vitrine-page .services-contact-link svg {
+  transition: transform 0.3s ease;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design adjustments in responsive.css */
