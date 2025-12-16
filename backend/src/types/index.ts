@@ -5,6 +5,12 @@ import { IInvoice } from "../models/Invoice";
 import { IPayment } from "../models/Payment";
 import { IMessage } from "../models/Message";
 
+export interface IGerant {
+  email: string;
+  phone: string;
+  'Nom gérant'?: string;
+}
+
 export interface IUser {
   _id: string;
   email: string;
@@ -15,6 +21,13 @@ export interface IUser {
   phone?: string;
   address?: string;
   avatar?: string;
+  dossier_number?: string;
+  tax_number?: string;
+  cnss?: string;
+  nature?: 'personne_physique' | 'personne_morale';
+  regime_fiscal?: 'regime_reel' | 'regime_reel_simplifie' | 'forfait_assiette' | 'forfaitaire';
+  gerants?: IGerant[];
+  status?: 'active' | 'inactive';
   googleCalendarTokens?: {
     access_token: string;
     refresh_token: string;
@@ -45,6 +58,13 @@ export interface LoginResponse {
     phone?: string;
     address?: string;
     avatar?: string;
+    dossier_number?: string;
+    tax_number?: string;
+    cnss?: string;
+    nature?: 'personne_physique' | 'personne_morale';
+    regime_fiscal?: 'regime_reel' | 'regime_reel_simplifie' | 'forfait_assiette' | 'forfaitaire';
+    gerants?: IGerant[];
+    status?: 'active' | 'inactive';
   };
   token: string;
 }
@@ -62,6 +82,12 @@ export interface ClientResponse {
   totalInvoices: number;
   totalPaid: number;
   totalPending: number;
+  dossier_number?: string;
+  tax_number?: string;
+  cnss?: string;
+  nature?: 'personne_physique' | 'personne_morale';
+  regime_fiscal?: 'regime_reel' | 'regime_reel_simplifie' | 'forfait_assiette' | 'forfaitaire';
+  gerants?: IGerant[];
 }
 
 export interface InvoiceItemResponse {

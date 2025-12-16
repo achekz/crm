@@ -7,12 +7,48 @@ import { AuthRequest, LoginResponse } from '../types';
 // Register a new user
 export const register = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { email, password, name, company, role, phone, address, avatar } = req.body;
+    const { 
+      email, 
+      password, 
+      name, 
+      company, 
+      role, 
+      phone, 
+      address, 
+      avatar,
+      dossier_number,
+      tax_number,
+      cnss,
+      nature,
+      regime_fiscal,
+      gerants,
+      status
+    } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return next(new AppError('Email already in use', 400));
+    }
+
+    // Validate that regime_fiscal is only set for personne_physique
+    if (regime_fiscal && nature !== 'personne_physique') {
+      return next(new AppError('Régime fiscal can only be set for personne physique', 400));
+    }
+
+    // Validate gerants array
+    if (gerants && Array.isArray(gerants)) {
+      if (gerants.length === 0) {
+        return next(new AppError('At least one gérant is required', 400));
+      }
+      // Validate each gerant has required fields
+      for (const gerant of gerants) {
+        if (!gerant.email || !gerant.phone) {
+          return next(new AppError('Each gérant must have email and phone', 400));
+        }
+      }
+    } else if (!gerants) {
+      return next(new AppError('At least one gérant is required', 400));
     }
 
     // Create new user
@@ -24,6 +60,13 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
       phone,
       address,
       avatar,
+      dossier_number,
+      tax_number,
+      cnss,
+      nature,
+      regime_fiscal,
+      gerants,
+      status: status || 'active',
       // Always set role to 'client' for security
       // Admin users must be created manually or through a separate process
       role: 'client'
@@ -42,7 +85,14 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
         company: user.company,
         phone: user.phone,
         address: user.address,
-        avatar: user.avatar
+        avatar: user.avatar,
+        dossier_number: user.dossier_number,
+        tax_number: user.tax_number,
+        cnss: user.cnss,
+        nature: user.nature,
+        regime_fiscal: user.regime_fiscal,
+        gerants: user.gerants,
+        status: user.status
       },
       token
     };
@@ -114,7 +164,14 @@ export const getCurrentUser = async (req: AuthRequest, res: Response, next: Next
       company: user.company,
       phone: user.phone,
       address: user.address,
-      avatar: user.avatar
+      avatar: user.avatar,
+      dossier_number: user.dossier_number,
+      tax_number: user.tax_number,
+      cnss: user.cnss,
+      nature: user.nature,
+      regime_fiscal: user.regime_fiscal,
+      gerants: user.gerants,
+      status: user.status
     }, 'User details retrieved successfully');
   } catch (error) {
     next(error);
@@ -128,7 +185,20 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
       return next(new AppError('You are not logged in', 401));
     }
 
-    const { name, email, company, phone, address } = req.body;
+    const { 
+      name, 
+      email, 
+      company, 
+      phone, 
+      address,
+      dossier_number,
+      tax_number,
+      cnss,
+      nature,
+      regime_fiscal,
+      gerants,
+      status
+    } = req.body;
 
     // Check if email is unique if changed
     if (email) {
@@ -138,9 +208,49 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
       }
     }
 
+    // Validate that regime_fiscal is only set for personne_physique
+    if (regime_fiscal && nature !== 'personne_physique') {
+      return next(new AppError('Régime fiscal can only be set for personne physique', 400));
+    }
+
+    // Validate gerants array if provided
+    if (gerants && Array.isArray(gerants)) {
+      if (gerants.length === 0) {
+        return next(new AppError('At least one gérant is required', 400));
+      }
+      // Validate each gerant has required fields
+      for (const gerant of gerants) {
+        if (!gerant.email || !gerant.phone) {
+          return next(new AppError('Each gérant must have email and phone', 400));
+        }
+      }
+    }
+
+    const updateData: any = { 
+      name, 
+      email, 
+      company, 
+      phone, 
+      address,
+      dossier_number,
+      tax_number,
+      cnss,
+      nature,
+      regime_fiscal,
+      gerants,
+      status
+    };
+
+    // Remove undefined fields
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === undefined) {
+        delete updateData[key];
+      }
+    });
+
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id, 
-      { name, email, company, phone, address },
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -156,7 +266,14 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
       company: updatedUser.company,
       phone: updatedUser.phone,
       address: updatedUser.address,
-      avatar: updatedUser.avatar
+      avatar: updatedUser.avatar,
+      dossier_number: updatedUser.dossier_number,
+      tax_number: updatedUser.tax_number,
+      cnss: updatedUser.cnss,
+      nature: updatedUser.nature,
+      regime_fiscal: updatedUser.regime_fiscal,
+      gerants: updatedUser.gerants,
+      status: updatedUser.status
     }, 'Profile updated successfully');
   } catch (error) {
     next(error);
@@ -214,9 +331,15 @@ export const getClientUsers = async (req: AuthRequest, res: Response, next: Next
       address: user.address || '',
       role: user.role,
       avatar: user.avatar,
+      dossier_number: user.dossier_number,
+      tax_number: user.tax_number,
+      cnss: user.cnss,
+      nature: user.nature,
+      regime_fiscal: user.regime_fiscal,
+      gerants: user.gerants || [],
+      status: user.status || 'active',
       createdAt: user.createdAt.toISOString().split('T')[0],
       lastActivity: user.updatedAt.toISOString().split('T')[0],
-      status: 'active', // Default status for users
       totalInvoices: 0,  // These would need to be calculated from actual invoices
       totalPaid: 0,
       totalPending: 0

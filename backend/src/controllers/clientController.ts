@@ -42,9 +42,15 @@ export const getAllClients = async (req: AuthRequest, res: Response, next: NextF
       phone: user.phone || '',
       company: user.company || '',
       address: user.address || '',
+      dossier_number: user.dossier_number,
+      tax_number: user.tax_number,
+      cnss: user.cnss,
+      nature: user.nature,
+      regime_fiscal: user.regime_fiscal,
+      gerants: user.gerants || [],
+      status: user.status || 'active',
       createdAt: user.createdAt ? user.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       lastActivity: user.updatedAt ? user.updatedAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      status: 'active', // Default status for users
       totalInvoices: 0, // Will be calculated from invoices
       totalPaid: 0, // Will be calculated from invoices
       totalPending: 0 // Will be calculated from invoices
@@ -84,9 +90,15 @@ export const getClientById = async (req: AuthRequest, res: Response, next: NextF
       phone: client.phone || '',
       company: client.company || '',
       address: client.address || '',
+      dossier_number: client.dossier_number,
+      tax_number: client.tax_number,
+      cnss: client.cnss,
+      nature: client.nature,
+      regime_fiscal: client.regime_fiscal,
+      gerants: client.gerants || [],
+      status: client.status || 'active',
       createdAt: client.createdAt ? client.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       lastActivity: client.updatedAt ? client.updatedAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      status: 'active',
       totalInvoices: 0,
       totalPaid: 0,
       totalPending: 0
@@ -154,7 +166,20 @@ export const updateClient = async (req: AuthRequest, res: Response, next: NextFu
     }
 
     const { id } = req.params;
-    const { name, email, phone, company, address, status } = req.body;
+    const { 
+      name, 
+      email, 
+      phone, 
+      company, 
+      address, 
+      status,
+      dossier_number,
+      tax_number,
+      cnss,
+      nature,
+      regime_fiscal,
+      gerants
+    } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return next(new AppError('Invalid client ID', 400));
@@ -168,9 +193,49 @@ export const updateClient = async (req: AuthRequest, res: Response, next: NextFu
       }
     }
 
+    // Validate that regime_fiscal is only set for personne_physique
+    if (regime_fiscal && nature !== 'personne_physique') {
+      return next(new AppError('Régime fiscal can only be set for personne physique', 400));
+    }
+
+    // Validate gerants array if provided
+    if (gerants && Array.isArray(gerants)) {
+      if (gerants.length === 0) {
+        return next(new AppError('At least one gérant is required', 400));
+      }
+      // Validate each gerant has required fields
+      for (const gerant of gerants) {
+        if (!gerant.email || !gerant.phone) {
+          return next(new AppError('Each gérant must have email and phone', 400));
+        }
+      }
+    }
+
+    const updateData: any = {
+      name,
+      email,
+      phone,
+      company,
+      address,
+      status,
+      dossier_number,
+      tax_number,
+      cnss,
+      nature,
+      regime_fiscal,
+      gerants
+    };
+
+    // Remove undefined fields
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === undefined) {
+        delete updateData[key];
+      }
+    });
+
     const updatedClient = await User.findOneAndUpdate(
       { _id: id, role: 'client' },
-      { name, email, phone, company, address },
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -186,9 +251,15 @@ export const updateClient = async (req: AuthRequest, res: Response, next: NextFu
       phone: updatedClient.phone || '',
       company: updatedClient.company || '',
       address: updatedClient.address || '',
+      dossier_number: updatedClient.dossier_number,
+      tax_number: updatedClient.tax_number,
+      cnss: updatedClient.cnss,
+      nature: updatedClient.nature,
+      regime_fiscal: updatedClient.regime_fiscal,
+      gerants: updatedClient.gerants || [],
+      status: updatedClient.status || 'active',
       createdAt: updatedClient.createdAt ? updatedClient.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       lastActivity: updatedClient.updatedAt ? updatedClient.updatedAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      status: 'active',
       totalInvoices: 0,
       totalPaid: 0,
       totalPending: 0

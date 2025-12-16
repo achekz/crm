@@ -19,11 +19,11 @@ import {
   Spin,
   Select,
   Empty,
-  Tooltip,
+  Radio,
+  Divider,
 } from 'antd';
 import {
   PlusOutlined,
-  SearchOutlined,
   MoreOutlined,
   EditOutlined,
   DeleteOutlined,
@@ -36,6 +36,7 @@ import {
   ClockCircleOutlined,
   LoadingOutlined,
   LockOutlined,
+  MinusCircleOutlined,
 } from '@ant-design/icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../../store';
@@ -47,15 +48,41 @@ const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
+type ClientNature = "personne_physique" | "personne_morale";
+
+type RegimeFiscal =
+  | "regime_reel"
+  | "regime_reel_simplifie"
+  | "forfait_assiette"
+  | "forfaitaire";
+
+interface Gerant {
+  email: string;
+  phone: string;
+}
+
 interface CreateClientData {
   name: string;
   email: string;
   password: string;
+
   company?: string;
   phone?: string;
   address?: string;
   avatar?: string;
+
+  tax_number?: string;
+  cnss?: string;
+
+  nature: ClientNature;
+
+  regime_fiscal?: RegimeFiscal; // only if personne_physique
+
+  gerants: Gerant[]; // 1 or many
+
+  dossier_number: string;
 }
+
 
 const ClientsPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -68,6 +95,18 @@ const ClientsPage: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [uploadLoading, setUploadLoading] = useState(false);
   const [form] = Form.useForm();
+  const [clientNature, setClientNature] = useState<ClientNature | undefined>(undefined);
+  
+  // Watch the nature field to update state
+  const natureValue = Form.useWatch('nature', form);
+  
+  useEffect(() => {
+    if (natureValue) {
+      setClientNature(natureValue);
+    } else {
+      setClientNature(undefined);
+    }
+  }, [natureValue]);
 
   // Fetch clients on component mount
   useEffect(() => {
@@ -220,7 +259,7 @@ const ClientsPage: React.FC = () => {
         delete clientData.avatar;
       }
 
-      const response = await axios.post('http://localhost:5000/api/auth/admin/register', {
+      await axios.post('http://localhost:5000/api/auth/admin/register', {
         ...clientData,
         role: 'client',
       }, {
@@ -321,44 +360,58 @@ const ClientsPage: React.FC = () => {
       render: (record: Client) => (
         <Dropdown
           overlay={
-            <Space direction="vertical" size="small">
-              <Button 
-                type="text" 
-                icon={<EyeOutlined />}
-                onClick={() => console.log('Voir client', record.id)}
-              >
-                Voir
-              </Button>
-              <Button 
-                type="text" 
-                icon={<EditOutlined />}
-                onClick={() => {
-                  setEditingClient(record);
-                  setIsCreating(false);
-                  setModalVisible(true);
-                  form.setFieldsValue({
-                    ...record,
-                    status: record.status || 'active'
-                  });
-                }}
-              >
-                Modifier
-              </Button>
-              <Button 
-                type="text" 
-                danger 
-                icon={<DeleteOutlined />}
-                onClick={() => {
-                  Modal.confirm({
-                    title: 'Supprimer le client',
-                    content: 'Êtes-vous sûr de vouloir supprimer ce client ?',
-                    onOk: () => dispatch(deleteClientThunk(record.id)),
-                  });
-                }}
-              >
-                Supprimer
-              </Button>
-            </Space>
+            <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '15px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+              <Space direction="vertical" size="small">
+                <Button 
+                  type="text" 
+                  icon={<EyeOutlined />}
+                  onClick={() => console.log('Voir client', record.id)}
+                >
+                  Voir
+                </Button>
+                <Button 
+                  type="text" 
+                  icon={<EditOutlined />}
+                  onClick={() => {
+                    setEditingClient(record);
+                    setIsCreating(false);
+                    setModalVisible(true);
+                    const formValues: any = {
+                      ...record,
+                      status: record.status || 'active'
+                    };
+                    // Set nature if it exists in the record
+                    if ((record as any).nature) {
+                      setClientNature((record as any).nature);
+                      formValues.nature = (record as any).nature;
+                    }
+                    // Set gerants if they exist, otherwise initialize with empty one
+                    if ((record as any).gerants && Array.isArray((record as any).gerants)) {
+                      formValues.gerants = (record as any).gerants;
+                    } else {
+                      formValues.gerants = [{ email: '', phone: '' }];
+                    }
+                    form.setFieldsValue(formValues);
+                  }}
+                >
+                  Modifier
+                </Button>
+                <Button 
+                  type="text" 
+                  danger 
+                  icon={<DeleteOutlined />}
+                  onClick={() => {
+                    Modal.confirm({
+                      title: 'Supprimer le client',
+                      content: 'Êtes-vous sûr de vouloir supprimer ce client ?',
+                      onOk: () => dispatch(deleteClientThunk(record.id)),
+                    });
+                  }}
+                >
+                  Supprimer
+                </Button>
+              </Space>
+            </div>
           }
           trigger={['click']}
         >
@@ -459,7 +512,12 @@ const ClientsPage: React.FC = () => {
               setEditingClient(null);
               setModalVisible(true);
               setAvatarUrl('');
+              setClientNature(undefined);
               form.resetFields();
+              // Initialize with at least one gerant
+              form.setFieldsValue({
+                gerants: [{ email: '', phone: '' }]
+              });
             }}
           >
             Nouveau Client
@@ -502,9 +560,10 @@ const ClientsPage: React.FC = () => {
           setIsCreating(false);
           form.resetFields();
           setAvatarUrl('');
+          setClientNature(undefined);
         }}
         onOk={() => form.submit()}
-        width={700}
+        width={900}
       >
         <Form
           form={form}
@@ -604,6 +663,170 @@ const ClientsPage: React.FC = () => {
           >
             <Input.TextArea rows={3} />
           </Form.Item>
+
+          <Divider />
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="dossier_number"
+                label="N° de dossier"
+                rules={[{ required: true, message: 'N° de dossier requis' }]}
+              >
+                <Input placeholder="N° de dossier" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="tax_number"
+                label="Matricule fiscale"
+              >
+                <Input placeholder="Matricule fiscale" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="cnss"
+                label="N° CNSS"
+              >
+                <Input placeholder="N° CNSS" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="nature"
+                label="Nature de client"
+                rules={[{ required: true, message: 'Nature de client requise' }]}
+              >
+                <Select 
+                  placeholder="Sélectionner la nature"
+                  onChange={(value) => {
+                    setClientNature(value);
+                    if (value === 'personne_morale') {
+                      form.setFieldsValue({ regime_fiscal: undefined });
+                    }
+                  }}
+                >
+                  <Option value="personne_physique">Personne physique</Option>
+                  <Option value="personne_morale">Personne morale</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          {clientNature === 'personne_physique' && (
+            <Form.Item
+              name="regime_fiscal"
+              label="Régime fiscal"
+              rules={[{ required: true, message: 'Régime fiscal requis' }]}
+            >
+              <Radio.Group>
+                <Space direction="vertical">
+                  <Radio value="regime_reel">Régime réel</Radio>
+                  <Radio value="regime_reel_simplifie">Régime réel simplifié</Radio>
+                  <Radio value="forfait_assiette">Forfait d'assiette</Radio>
+                  <Radio value="forfaitaire">Forfaitaire</Radio>
+                </Space>
+              </Radio.Group>
+            </Form.Item>
+          )}
+
+          <Divider />
+
+          <Form.Item
+            label="Informations de contact (Gérants)"
+            required
+          >
+            <Form.List
+              name="gerants"
+              rules={[
+                {
+                  validator: async (_, gerants) => {
+                    if (!gerants || gerants.length < 1) {
+                      return Promise.reject(new Error('Au moins un gérant est requis'));
+                    }
+                  },
+                },
+              ]}
+            >
+              {(fields, { add, remove }, { errors }) => (
+                <>
+                  {fields.map((field, index) => (
+                    <Card
+                      key={field.key}
+                      size="small"
+                      style={{ marginBottom: 16 }}
+                      title={`Gérant ${index + 1}`}
+                      extra={
+                        fields.length > 1 ? (
+                          <Button
+                            type="text"
+                            danger
+                            icon={<MinusCircleOutlined />}
+                            onClick={() => remove(field.name)}
+                          />
+                        ) : null
+                      }
+                    >
+                      <Row gutter={16}>
+                        <Col span={8}>
+                          <Form.Item
+                            {...field}
+                            name={[field.name, 'Nom gérant']}
+                            label="Nom gérant"
+                            rules={[
+                              { required: true, message: 'Nom du gérant requis' }
+                            ]}
+                          >
+                            <Input placeholder="Nom du gérant" prefix={<UserOutlined />} />
+                          </Form.Item>
+                        </Col>
+                        <Col span={8}>
+                          <Form.Item
+                            {...field}
+                            name={[field.name, 'phone']}
+                            label="Numéro de téléphone"
+                            rules={[{ required: true, message: 'Numéro de téléphone requis' }]}
+                          >
+                            <Input placeholder="Numéro de téléphone" prefix={<PhoneOutlined />} />
+                          </Form.Item>
+                        </Col>
+                        <Col span={8}>
+                          <Form.Item
+                            {...field}
+                            name={[field.name, 'email']}
+                            label="Email"
+                            rules={[
+                              { required: true, message: 'Email requis' },
+                              { type: 'email', message: 'Email invalide' }
+                            ]}
+                          >
+                            <Input placeholder="Email du gérant" prefix={<MailOutlined />} />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </Card>
+                  ))}
+                  <Form.Item>
+                    <Button
+                      type="dashed"
+                      onClick={() => add()}
+                      block
+                      icon={<PlusOutlined />}
+                    >
+                      Ajouter un gérant
+                    </Button>
+                    <Form.ErrorList errors={errors} />
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
+          </Form.Item>
+
+          <Divider />
 
           <Form.Item
             name="status"
