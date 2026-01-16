@@ -259,7 +259,7 @@ const ClientsPage: React.FC = () => {
         delete clientData.avatar;
       }
 
-      await axios.post('http://localhost:5000/api/auth/admin/register', {
+      await axios.post('/api/auth/admin/register', {
         ...clientData,
         role: 'client',
       }, {

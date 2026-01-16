@@ -10,7 +10,7 @@ export const createPaymentIntent = async (invoice: IInvoice, client: IUser) => {
     // Create a payment intent with Stripe
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(invoice.total * 100), // Stripe requires amount in smallest currency unit (cents)
-      currency: 'tnd',
+      currency: process.env.STRIPE_CURRENCY || 'usd',
       description: `Invoice #${invoice.number} payment`,
       metadata: {
         invoiceId: invoice._id.toString(),
@@ -57,7 +57,7 @@ export const createCheckoutSession = async (invoice: IInvoice, client: IUser, su
       line_items: [
         {
           price_data: {
-            currency: 'tnd',
+            currency: process.env.STRIPE_CURRENCY || 'usd',
             product_data: {
               name: `Invoice #${invoice.number}`,
               description: `Payment for invoice #${invoice.number}`,

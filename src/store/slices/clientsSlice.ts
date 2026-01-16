@@ -7,12 +7,10 @@ const AUTH_API_URL = '/api/auth';
 
 // Function to get the base API URL (helpful for debugging)
 export const getApiBaseUrl = () => {
-  // Default to relative URL which will use the Vite proxy
   return '/api';
-  
-  // For debugging, you can uncomment this to directly hit the backend:
-  // return 'http://localhost:5000/api';
 };
+
+const BACKEND_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 export interface Client {
   id: string;
@@ -70,7 +68,7 @@ export const fetchClients = createAsyncThunk(
         
         // If proxy fails, try direct connection
         try {
-          response = await axios.get(`http://localhost:5000${API_URL}`, {
+          response = await axios.get(`${BACKEND_BASE}${API_URL}`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -145,7 +143,7 @@ export const fetchClients = createAsyncThunk(
       if (error.response?.status === 401 || error.response?.status === 403) {
         return rejectWithValue('Authentication failed. Please log in again.');
       } else if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        return rejectWithValue('Cannot connect to server. Please check if the server is running at http://localhost:5000.');
+        return rejectWithValue('Cannot connect to server. Please check if the backend is running.');
       }
       
       return rejectWithValue(

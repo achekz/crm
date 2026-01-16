@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ isScrolled, isHeaderVisible }) => {
       <div className="logo-container">
         <div className="logo-wrapper">
           <img 
-            src="public\cmt-logo-temp.png" 
+            src=".\cmt.png" 
             alt="CMT Logo" 
             className="header-logo"
           />

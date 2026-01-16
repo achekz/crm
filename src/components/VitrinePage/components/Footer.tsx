@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
       <div className="footer-grid">
         <div className="company-info">
           <img
-           src="public\cmt-logo-temp.png" 
+           src="./cmt.png" 
             alt="CMT Logo" 
             className="footer-logo" 
             

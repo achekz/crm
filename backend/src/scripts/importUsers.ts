@@ -28,7 +28,10 @@ const importUsers = async () => {
     await connectDB();
     
     const results: any[] = [];
-    const filePath = path.resolve(__dirname, '../..', 'users_tunisia.csv');
+    // Support both development (ts-node) and production (compiled) paths
+    const isCompiled = __filename.endsWith('.js');
+    const basePath = isCompiled ? path.resolve(__dirname, '../..') : path.resolve(__dirname, '../../..');
+    const filePath = path.resolve(basePath, 'users_tunisia.csv');
     
     fs.createReadStream(filePath)
       .pipe(csv())

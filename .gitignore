@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Build artifacts
+*.tsbuildinfo
+*.zip
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -23,3 +27,5 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.local
+.env.production
