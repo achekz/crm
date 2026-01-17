@@ -1,7 +1,7 @@
 /* Enhanced Navigation */
 .vitrine-page .main-navigation {
   position: fixed;
-  top: 9.5rem; /* Increased from 6.5rem to avoid header overlap */
+  top: 4rem; /* Connect directly to header (min-height: 3rem) */
   left: 0;
   right: 0;
   z-index: 998;
@@ -13,21 +13,28 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   border-bottom: 2px solid rgba(217, 201, 172, 0.3);
   transform: translateY(0);
+  margin-top: 0; /* Ensure no gap */
+}
+
+/* When header is hidden, navigation moves to top */
+.vitrine-page .main-navigation.header-hidden {
+  top: 0; /* Flush with the very top when header is hidden */
 }
 
 .vitrine-page .main-navigation.scrolled {
-  top: 7rem; /* Increased from 6rem to ensure no overlap when scrolled */
+  top: 4rem; /* Position below scrolled header (min-height: 2.5rem) */
   background: linear-gradient(90deg, rgba(74, 107, 106, 0.95), rgba(63, 90, 89, 0.95));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  margin-top: 0; /* Ensure no gap */
 }
 
-.vitrine-page .main-navigation.hidden {
-  transform: translateY(-150%);
-  box-shadow: none;
+/* When header is hidden AND scrolled, navigation stays at top */
+.vitrine-page .main-navigation.scrolled.header-hidden {
+  top: 0; /* Stay at top when header is hidden, regardless of scroll state */
 }
 
 .vitrine-page .nav-menu {
@@ -47,6 +54,14 @@
   position: relative;
   display: flex;
   align-items: center;
+}
+
+/* Center the dropdown container */
+.vitrine-page .dropdown-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* Stack button and menu vertically */
 }
 
 .vitrine-page .nav-link {
@@ -102,14 +117,14 @@
 .vitrine-page .dropdown-menu {
   position: absolute;
   top: 100%;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
   background: rgba(74, 107, 106, 0.98);
   min-width: 220px;
   border-radius: var(--radius-xl);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-10px);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 1000;
   list-style: none;
@@ -123,7 +138,7 @@
 .vitrine-page .dropdown-menu.visible {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .vitrine-page .dropdown-link {
@@ -163,9 +178,7 @@
 
 .vitrine-page .mobile-menu-btn {
   display: none;
-  position: fixed;
-  top: 13rem; /* Updated from 10rem to align with new navigation position */
-  right: var(--space-6);
+  position: relative; /* Changed from fixed - will be positioned relative to header on mobile */
   background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
   color: white;
   border: none;
@@ -179,10 +192,18 @@
   box-shadow: 0 4px 20px rgba(74, 107, 106, 0.4);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   border: 2px solid rgba(255, 255, 255, 0.2);
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 .vitrine-page .mobile-menu-btn.scrolled {
-  top: 10.5rem; /* Updated from 9.5rem to align with scrolled navigation */
+  top: 0.75rem; /* Slightly adjust when scrolled */
+}
+
+/* Mobile menu button should also move with header */
+.vitrine-page .mobile-menu-btn.header-hidden {
+  top: 0.75rem; /* Position when header is hidden */
 }
 
 .vitrine-page .mobile-menu-btn:hover {

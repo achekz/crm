@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 interface NavigationProps {
   isScrolled: boolean;
@@ -16,25 +16,14 @@ const Navigation: React.FC<NavigationProps> = ({
   isHeaderVisible,
   mobileMenuOpen,
   notreCabinetDropdownOpen,
-  toggleMobileMenu,
   toggleNotreCabinetDropdown,
   scrollToSection
 }) => {
   return (
     <>
-      <button 
-        className={`mobile-menu-btn ${isScrolled ? 'scrolled' : ''} ${!isHeaderVisible ? 'hidden' : ''}`}
-        onClick={toggleMobileMenu}
-        aria-label="Menu mobile"
-        aria-controls="main-navigation"
-        aria-expanded={mobileMenuOpen}
-      >
-        {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
       <nav 
         id="main-navigation" 
-        className={`main-navigation ${isScrolled ? 'scrolled' : ''} ${mobileMenuOpen ? 'mobile-open' : ''} ${!isHeaderVisible ? 'hidden' : ''}`} 
+        className={`main-navigation ${isScrolled ? 'scrolled' : ''} ${mobileMenuOpen ? 'mobile-open' : ''} ${!isHeaderVisible ? 'header-hidden' : ''}`} 
         aria-label="Navigation principale"
       >
         <ul className="nav-menu" role="menubar">

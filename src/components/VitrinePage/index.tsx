@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
 import HeroSection from './components/HeroSection';
@@ -79,17 +78,12 @@ const VitrinePage: React.FC = () => {
 
   return (
     <div className="vitrine-page">
-      {/* Connection Section */}
-      <div className={`connection-section ${isScrolled ? 'scrolled' : ''} ${!isHeaderVisible ? 'hidden' : ''}`}>
-        <Link to="/login" className="login-button">
-          <span>Se connecter</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
-        </Link>
-      </div>
-
-      <Header isScrolled={isScrolled} isHeaderVisible={isHeaderVisible} />
+      <Header 
+        isScrolled={isScrolled} 
+        isHeaderVisible={isHeaderVisible}
+        mobileMenuOpen={mobileMenuOpen}
+        toggleMobileMenu={toggleMobileMenu}
+      />
       
       <Navigation 
         isScrolled={isScrolled}

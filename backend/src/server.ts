@@ -100,7 +100,9 @@ const io = initializeSocket(server);
 setSocketInstance(io);
 
 // Start server
-server.listen(PORT, () => {
+const HOST = '0.0.0.0';
+server.listen(PORT, HOST as any, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   console.log("Socket.IO server initialized with invoice notifications support");
+  console.log(`Accessible at: http://localhost:${PORT}`);
 });
