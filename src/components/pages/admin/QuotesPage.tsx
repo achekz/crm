@@ -18,6 +18,7 @@ import {
   Divider,
   message,
   Descriptions,
+  Drawer,
 } from 'antd';
 import {
   PlusOutlined,
@@ -29,6 +30,7 @@ import {
   SendOutlined,
   DownloadOutlined,
   CheckOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../store';
@@ -51,6 +53,7 @@ const QuotesPage: React.FC = () => {
   const [viewingQuote, setViewingQuote] = useState<Quote | null>(null);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [form] = Form.useForm();
+  const [searchExpanded, setSearchExpanded] = useState(false);
 
   // Fetch quotes from backend when component mounts
   useEffect(() => {
@@ -366,40 +369,105 @@ const QuotesPage: React.FC = () => {
       </div>
 
       <Card style={{ marginBottom: 16 }}>
-        <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
-          <Search
-            placeholder="Rechercher un devis..."
-            allowClear
-            onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 300 }}
-          />
-          
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setEditingQuote(null);
-              setModalVisible(true);
-              form.resetFields();
-            }}
-          >
-            Nouveau devis
-          </Button>
-        </Space>
+        {/* Desktop View */}
+        <div style={{ display: 'none' }} className="desktop-view">
+          <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
+            <Search
+              placeholder="Rechercher un devis..."
+              allowClear
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: 300 }}
+            />
+            
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setEditingQuote(null);
+                setModalVisible(true);
+                form.resetFields();
+              }}
+            >
+              Nouveau devis
+            </Button>
+          </Space>
+        </div>
 
-        <Table
-          dataSource={filteredQuotes}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => 
-              `${range[0]}-${range[1]} sur ${total} devis`,
-          }}
-        />
+        {/* Mobile View */}
+        <div style={{ display: 'none' }} className="mobile-view">
+          {!searchExpanded ? (
+            <div style={{ display: 'flex', gap: '8px', marginBottom: 16, width: '100%' }}>
+              <Button
+                style={{ flex: 3 }}
+                icon={<SearchOutlined />}
+                onClick={() => setSearchExpanded(true)}
+              >
+                Chercher
+              </Button>
+              
+              <Button
+                type="primary"
+                style={{ flex: 1}}
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingQuote(null);
+                  setModalVisible(true);
+                  form.resetFields();
+                }}
+              >
+                Nouveau
+              </Button>
+            </div>
+          ) : (
+            <div style={{ marginBottom: 16 }}>
+              <Search
+                placeholder="Rechercher un devis..."
+                allowClear
+                onChange={(e) => setSearchText(e.target.value)}
+                onBlur={() => setSearchExpanded(false)}
+                autoFocus
+                style={{ width: '100%' }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Responsive CSS */}
+        <style>{`
+          @media (max-width: 1005px) {
+            .desktop-view {
+              display: none !important;
+            }
+            .mobile-view {
+              display: block !important;
+            }
+          }
+          @media (min-width: 1006px) {
+            .desktop-view {
+              display: block !important;
+            }
+            .mobile-view {
+              display: none !important;
+            }
+          }
+        `}</style>
+
+        <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+          <Table
+            dataSource={filteredQuotes}
+            columns={columns}
+            rowKey="id"
+            loading={loading}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) => 
+                `${range[0]}-${range[1]} sur ${total} devis`,
+            }}
+            style={{ minWidth: '800px' }}
+          />
+        </div>
       </Card>
 
       {/* Modal de création/édition */}

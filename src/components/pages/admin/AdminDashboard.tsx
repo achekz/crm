@@ -208,13 +208,16 @@ const AdminDashboard: React.FC = () => {
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={16}>
           <Card title="Factures récentes" extra={<Button type="link">Voir tout</Button>}>
-            <Table
-              dataSource={recentInvoices}
-              columns={invoiceColumns}
-              pagination={false}
-              size="small"
-              rowKey="id"
-            />
+            <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+              <Table
+                dataSource={recentInvoices}
+                columns={invoiceColumns}
+                pagination={false}
+                size="small"
+                rowKey="id"
+                style={{ minWidth: '600px' }}
+              />
+            </div>
           </Card>
         </Col>
 

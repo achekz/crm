@@ -21,6 +21,7 @@ import {
   Empty,
   Radio,
   Divider,
+  Drawer,
 } from 'antd';
 import {
   PlusOutlined,
@@ -37,6 +38,7 @@ import {
   LoadingOutlined,
   LockOutlined,
   MinusCircleOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../../store';
@@ -60,7 +62,7 @@ interface Gerant {
   email: string;
   phone: string;
 }
-
+ 
 interface CreateClientData {
   name: string;
   email: string;
@@ -96,6 +98,7 @@ const ClientsPage: React.FC = () => {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [form] = Form.useForm();
   const [clientNature, setClientNature] = useState<ClientNature | undefined>(undefined);
+  const [searchExpanded, setSearchExpanded] = useState(false);
   
   // Watch the nature field to update state
   const natureValue = Form.useWatch('nature', form);
@@ -450,8 +453,8 @@ const ClientsPage: React.FC = () => {
         <Text type="secondary">Gérez vos clients et contacts</Text>
       </div>
 
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={8}>
+      <Row gutter={[16,10]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={24} lg={8}>
           <Card>
             <Statistic
               title="Nombre de clients"
@@ -461,7 +464,7 @@ const ClientsPage: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="CA Total"
@@ -472,7 +475,7 @@ const ClientsPage: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col span={8}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="En attente"
@@ -486,43 +489,120 @@ const ClientsPage: React.FC = () => {
       </Row>
 
       <Card style={{ marginBottom: 16 }}>
-        <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
-          <Space>
-            <Search
-              placeholder="Rechercher un client..."
-              allowClear
-              onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 300 }}
-            />
-            <Upload
-              accept=".xlsx,.xls"
-              showUploadList={false}
-              beforeUpload={handleExcelUpload}
+        {/* Desktop View */}
+        <div style={{ display: 'none' }} className="desktop-view">
+          <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
+            <Space>
+              <Search
+                placeholder="Rechercher un client..."
+                allowClear
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 300 }}
+              />
+              <Upload
+                accept=".xlsx,.xls"
+                showUploadList={false}
+                beforeUpload={handleExcelUpload}
+              >
+                <Button icon={<UploadOutlined />}>
+                  Importer Excel
+                </Button>
+              </Upload>
+            </Space>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setIsCreating(true);
+                setEditingClient(null);
+                setModalVisible(true);
+                setAvatarUrl('');
+                setClientNature(undefined);
+                form.resetFields();
+                // Initialize with at least one gerant
+                form.setFieldsValue({
+                  gerants: [{ email: '', phone: '' }]
+                });
+              }}
             >
-              <Button icon={<UploadOutlined />}>
-                Importer Excel
-              </Button>
-            </Upload>
+              Nouveau Client
+            </Button>
           </Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setIsCreating(true);
-              setEditingClient(null);
-              setModalVisible(true);
-              setAvatarUrl('');
-              setClientNature(undefined);
-              form.resetFields();
-              // Initialize with at least one gerant
-              form.setFieldsValue({
-                gerants: [{ email: '', phone: '' }]
-              });
-            }}
-          >
-            Nouveau Client
-          </Button>
-        </Space>
+        </div>
+
+        {/* Mobile View */}
+        <div style={{ display: 'none' }} className="mobile-view">
+          {!searchExpanded ? (
+            <div style={{ display: 'flex', gap: '8px', marginBottom: 16, width: '100%' }}>
+              {/* Search icon button - 60% width */}
+              <Button
+                style={{ flex: 3}}
+                icon={<SearchOutlined />}
+                onClick={() => setSearchExpanded(true)}
+              >
+                Chercher
+              </Button>
+              
+              {/* Upload button - 20% width */}
+              <Upload
+                accept=".xlsx,.xls"
+                showUploadList={false}
+                beforeUpload={handleExcelUpload}
+              >
+                <Button style={{ flex: 2}} icon={<UploadOutlined />} />
+              </Upload>
+
+              {/* Nouveau Client button - 20% width */}
+              <Button
+                type="primary"
+                style={{ flex: 1 }}
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setIsCreating(true);
+                  setEditingClient(null);
+                  setModalVisible(true);
+                  setAvatarUrl('');
+                  setClientNature(undefined);
+                  form.resetFields();
+                  form.setFieldsValue({
+                    gerants: [{ email: '', phone: '' }]
+                  });
+                }}
+              />
+            </div>
+          ) : (
+            <div style={{ marginBottom: 16 }}>
+              <Search
+                placeholder="Rechercher un client..."
+                allowClear
+                onChange={(e) => setSearchText(e.target.value)}
+                onBlur={() => setSearchExpanded(false)}
+                autoFocus
+                style={{ width: '100%' }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Responsive CSS */}
+        <style>{`
+          @media (max-width: 1005px) {
+            .desktop-view {
+              display: none !important;
+            }
+            .mobile-view {
+              display: block !important;
+            }
+          }
+          @media (min-width: 1006px) {
+            .desktop-view {
+              display: block !important;
+            }
+            .mobile-view {
+              display: none !important;
+            }
+          }
+        `}</style>
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '50px' }}>
@@ -535,18 +615,21 @@ const ClientsPage: React.FC = () => {
             image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
         ) : (
-          <Table
-            dataSource={filteredClients}
-            columns={columns}
-            rowKey="id"
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showQuickJumper: true,
-              showTotal: (total, range) => 
-                `${range[0]}-${range[1]} sur ${total} clients`,
-            }}
-          />
+          <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+            <Table
+              dataSource={filteredClients}
+              columns={columns}
+              rowKey="id"
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total, range) => 
+                  `${range[0]}-${range[1]} sur ${total} clients`,
+              }}
+              style={{ minWidth: '800px' }}
+            />
+          </div>
         )}
       </Card>
 

@@ -58,7 +58,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1005px) {
   .vitrine-page .mobile-menu-btn {
     display: flex !important;
     position: fixed;
@@ -217,7 +217,6 @@
     border-left: none;
     padding-left: 2.5rem;
   }
-
   .vitrine-page .hero-section {
     height: 80vh;
     min-height: 500px;
@@ -382,12 +381,15 @@
 
 @media (max-width: 480px) {
   .vitrine-page .hero-section {
-    height: 70vh;
-    min-height: 450px;
+    height: 100dvh;
+    min-height: 350px;
+    padding-top: 4rem;
   }
 
   .vitrine-page .hero-content {
     padding: 0 1.5rem;
+    margin-left: 0;
+    max-width: 100%;
   }
   
   .vitrine-page .hero-title {

@@ -25,6 +25,7 @@ import {
   Radio,
   Statistic,
   Descriptions,
+  Grid,
 } from 'antd';
 import {
   PlusOutlined,
@@ -41,6 +42,7 @@ import {
   DollarOutlined,
   CalendarOutlined,
   UserOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../../store';
@@ -61,6 +63,7 @@ import * as simpleGoogleCalendarService from '../../../services/simpleGoogleCale
 const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
+const { useBreakpoint } = Grid;
 
 const InvoicesPage: React.FC = () => {
   const { invoices, loading, error } = useSelector((state: RootState) => state.invoices);
@@ -75,6 +78,9 @@ const InvoicesPage: React.FC = () => {
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
   const [calendarAuthStatus, setCalendarAuthStatus] = useState<boolean>(false);
   const [calendarLoading, setCalendarLoading] = useState<boolean>(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const screens = useBreakpoint();
+  const isMobile: boolean = !screens.md;
 
   // Fetch invoices when component mounts
   useEffect(() => {
@@ -531,77 +537,171 @@ const InvoicesPage: React.FC = () => {
       </div>
 
       <Card style={{ marginBottom: 16 }}>
-        <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
-          <Search
-            placeholder="Rechercher une facture..."
-            allowClear
-            onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 300 }}
-          />
+        {/* Desktop View */}
+        <div style={{ display: 'none' }} className="invoices-desktop-view">
+          <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <Search
+              placeholder="Rechercher une facture..."
+              allowClear
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: 300 }}
+            />
 
-          <Space>
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />}
-              onClick={() => {
-                setEditingInvoice(null);
-                setModalVisible(true);
-                form.resetFields();
-                
-                // Debug info about clients
-                console.log('Opening invoice form. Available clients:', clients);
-                if (!clients || !Array.isArray(clients) || clients.length === 0) {
-                  message.warning('Aucun client disponible. La création de facture nécessite au moins un client.');
-                  // Try to fetch clients again if none are available
-                  dispatch(fetchClients());
-                }
-              }}
-            >
-              Nouvelle facture
-            </Button>
-
-            <Button 
-              onClick={checkCalendarAuth}
-              loading={calendarLoading}
-              icon={<CalendarOutlined />}
-              type={calendarAuthStatus ? 'primary' : 'default'}
-            >
-              {calendarAuthStatus ? 'Calendrier Connecté' : 'Vérifier Calendrier'}
-            </Button>
-            {!calendarAuthStatus && (
+            <Space>
               <Button 
-                onClick={openGoogleCalendar}
+                type="primary" 
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingInvoice(null);
+                  setModalVisible(true);
+                  form.resetFields();
+                  
+                  // Debug info about clients
+                  console.log('Opening invoice form. Available clients:', clients);
+                  if (!clients || !Array.isArray(clients) || clients.length === 0) {
+                    message.warning('Aucun client disponible. La création de facture nécessite au moins un client.');
+                    // Try to fetch clients again if none are available
+                    dispatch(fetchClients());
+                  }
+                }}
+              >
+                Nouvelle facture
+              </Button>
+
+              <Button 
+                onClick={checkCalendarAuth}
                 loading={calendarLoading}
                 icon={<CalendarOutlined />}
+                type={calendarAuthStatus ? 'primary' : 'default'}
               >
-                Ouvrir Google Calendar
+                {calendarAuthStatus ? 'Calendrier Connecté' : 'Vérifier Calendrier'}
               </Button>
-            )}
-            {calendarAuthStatus && (
-              <Button 
-                onClick={openGoogleCalendar}
-                loading={calendarLoading}
-                icon={<CalendarOutlined />}
-              >
-                Ouvrir Calendrier
-              </Button>
-            )}
+              {!calendarAuthStatus && (
+                <Button 
+                  onClick={openGoogleCalendar}
+                  loading={calendarLoading}
+                  icon={<CalendarOutlined />}
+                >
+                  Ouvrir Google Calendar
+                </Button>
+              )}
+              {calendarAuthStatus && (
+                <Button 
+                  onClick={openGoogleCalendar}
+                  loading={calendarLoading}
+                  icon={<CalendarOutlined />}
+                >
+                  Ouvrir Calendrier
+                </Button>
+              )}
+            </Space>
           </Space>
-        </Space>
+        </div>
 
-        <Table
-          dataSource={filteredInvoices}
-          columns={columns}
-          rowKey="id"
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} sur ${total} factures`,
-          }}
-          loading={loading}
-        />
+        {/* Mobile View */}
+        <div style={{ display: 'none' }} className="invoices-mobile-view">
+          {!searchExpanded ? (
+            <div style={{ display: 'flex', gap: '8px', marginBottom: 16, width: '100%', flexWrap: 'wrap' }}>
+              {/* Search icon button */}
+              <Button
+                style={{ flex: 1 }}
+                icon={<SearchOutlined />}
+                onClick={() => setSearchExpanded(true)}
+              >
+                Chercher
+              </Button>
+              
+              {/* Nouvelle facture button */}
+              <Button
+                type="primary"
+                style={{ flex: 1 }}
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingInvoice(null);
+                  setModalVisible(true);
+                  form.resetFields();
+                  console.log('Opening invoice form. Available clients:', clients);
+                  if (!clients || !Array.isArray(clients) || clients.length === 0) {
+                    message.warning('Aucun client disponible. La création de facture nécessite au moins un client.');
+                    dispatch(fetchClients());
+                  }
+                }}
+              >
+                Nouveau
+              </Button>
+
+              {/* Calendar buttons - show as icons only on mobile */}
+              <Button 
+                style={{ flex: 1 }}
+                onClick={checkCalendarAuth}
+                loading={calendarLoading}
+                icon={<CalendarOutlined />}
+                type={calendarAuthStatus ? 'primary' : 'default'}
+                size="small"
+              >
+                {calendarAuthStatus ? 'Cal.' : 'Vér.'}
+              </Button>
+              
+              <Button 
+                style={{ flex: 1 }}
+                onClick={openGoogleCalendar}
+                loading={calendarLoading}
+                icon={<CalendarOutlined />}
+                size="small"
+              >
+                {calendarAuthStatus ? 'Cal.' : 'G.Cal'}
+              </Button>
+            </div>
+          ) : (
+            <div style={{ marginBottom: 16 }}>
+              <Search
+                placeholder="Rechercher une facture..."
+                allowClear
+                onChange={(e) => setSearchText(e.target.value)}
+                onBlur={() => setSearchExpanded(false)}
+                autoFocus
+                style={{ width: '100%' }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Responsive CSS */}
+        <style>{`
+          @media (max-width: 1005px) {
+            .invoices-desktop-view {
+              display: none !important;
+            }
+            .invoices-mobile-view {
+              display: block !important;
+            }
+          }
+          @media (min-width: 1006px) {
+            .invoices-desktop-view {
+              display: block !important;
+            }
+            .invoices-mobile-view {
+              display: none !important;
+            }
+          }
+        `}</style>
+
+        <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+          <Table
+            dataSource={filteredInvoices}
+            columns={columns}
+            rowKey="id"
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} sur ${total} factures`,
+            }}
+            loading={loading}
+            style={{ minWidth: '900px' }}
+          />
+        </div>
       </Card>
 
       {/* Modal de création/édition */}
