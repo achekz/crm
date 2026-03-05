@@ -85,7 +85,7 @@ const numberToFrenchWords = (amount: number): string => {
     }
     const hundred = Math.floor(num / 100);
     const remainder = num % 100;
-    let result = hundred === 1 ? 'cent' : `${units[hundred]}-cent${hundred > 1 && remainder === 0 ? 's' : ''}`;
+    const result = hundred === 1 ? 'cent' : `${units[hundred]}-cent${hundred > 1 && remainder === 0 ? 's' : ''}`;
     return remainder > 0 ? `${result} ${convertHundreds(remainder)}` : result;
   };
 
@@ -94,7 +94,7 @@ const numberToFrenchWords = (amount: number): string => {
     if (num < 1000) return convertHundreds(num);
     const thousands = Math.floor(num / 1000);
     const remainder = num % 1000;
-    let result = thousands === 1 ? 'mille' : `${convertHundreds(thousands)}-mille`;
+    const result = thousands === 1 ? 'mille' : `${convertHundreds(thousands)}-mille`;
     return remainder > 0 ? `${result} ${convertHundreds(remainder)}` : result;
   };
 

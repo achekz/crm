@@ -149,7 +149,7 @@ const HelpSupportPage: React.FC = () => {
           <Card className="text-center hover:shadow-lg transition-shadow cursor-pointer">
             <MailOutlined className="text-3xl text-purple-600 mb-3" />
             <Title level={4}>Email</Title>
-            <Text type="secondary">support@erp-pro.com</Text>
+            <Text type="secondary">support@cmt.tn</Text>
           </Card>
         </Col>
         <Col span={6}>

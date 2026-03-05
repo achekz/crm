@@ -57,6 +57,8 @@ const SettingsPage = lazy(() => import("../pages/admin/SettingsPage"));
 const SecurityPage = lazy(() => import("../pages/admin/SecurityPage"));
 const DatabasePage = lazy(() => import("../pages/admin/DatabasePage"));
 const ApiIntegrationsPage = lazy(() => import("../pages/admin/ApiIntegrationsPage"));
+const NotificationManagementPage = lazy(() => import("../pages/admin/NotificationManagementPage"));
+const ReportsPage = lazy(() => import("../pages/admin/ReportsPage"));
 const HelpSupportPage = lazy(() => import("../pages/admin/HelpSupportPage"));
 
 const { Header, Sider, Content } = Layout;
@@ -316,6 +318,11 @@ const AdminLayout: React.FC = () => {
       label: "Messages",
     },
     {
+      key: "notifications",
+      icon: <BellOutlined />,
+      label: "Notifications",
+    },
+    {
       key: "reports",
       icon: <BarChartOutlined />,
       label: "Rapports",
@@ -330,6 +337,7 @@ const AdminLayout: React.FC = () => {
     if (path.includes("/invoices")) return "invoices";
     if (path.includes("/payments")) return "payments";
     if (path.includes("/messages")) return "messages";
+    if (path.includes("/notifications")) return "notifications";
     if (path.includes("/reports")) return "reports";
     return "dashboard";
   };
@@ -349,8 +357,8 @@ const AdminLayout: React.FC = () => {
               <CrownOutlined className="text-white text-lg" />
             </div>
             <div>
-              <div className="font-bold text-lg text-gray-800">ERP Pro</div>
-              <div className="text-xs text-gray-500">Admin Panel</div>
+              <div className="font-bold text-lg text-gray-800">CMT Expertise</div>
+              <div className="text-xs text-gray-500">Administration</div>
             </div>
           </div>
         }
@@ -389,8 +397,8 @@ const AdminLayout: React.FC = () => {
                 <CrownOutlined className="text-white text-xl" />
               </div>
               <div>
-                <div className="text-white font-bold text-xl">ERP Pro</div>
-                <div className="text-blue-200 text-sm">Admin Panel</div>
+                <div className="text-white font-bold text-xl">CMT Expertise</div>
+                <div className="text-blue-200 text-sm">Administration</div>
               </div>
             </div>
           )}
@@ -430,7 +438,7 @@ const AdminLayout: React.FC = () => {
                 <CrownOutlined className="text-white text-sm" />
               </div>
               <Text strong className="text-lg text-gray-800">
-                ERP Pro Admin
+                CMT Admin
               </Text>
             </div>
 
@@ -496,6 +504,8 @@ const AdminLayout: React.FC = () => {
                 <Route path="quotes" element={<QuotesPage />} />
                 <Route path="payments" element={<PaymentsPage />} />
                 <Route path="messages" element={<MessagesPage />} />
+                <Route path="notifications" element={<NotificationManagementPage />} />
+                <Route path="reports" element={<ReportsPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="security" element={<SecurityPage />} />

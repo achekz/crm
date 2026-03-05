@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { register, login, getCurrentUser, updateProfile, updateAvatar, getClientUsers } from '../controllers/authController';
 import { protect, restrictTo } from '../middleware/auth';
-// import { loginLimiter } from '../middleware/rateLimiter';
+import { loginLimiter } from '../middleware/rateLimiter';
+import { validateRegistration, validateLogin } from '../middleware/validation';
 
 const router = Router();
 
 // Public routes - for self-registration
-router.post('/register', register);
-router.post('/login', login);
+router.post('/register', validateRegistration, register);
+router.post('/login', loginLimiter, validateLogin, login);
 
 // Protected routes
 router.get('/me', protect, getCurrentUser);

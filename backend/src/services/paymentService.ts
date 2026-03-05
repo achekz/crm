@@ -93,7 +93,7 @@ export const createCheckoutSession = async (invoice: IInvoice, client: IUser, su
  */
 export const handleWebhookEvent = async (event: any) => {
   switch (event.type) {
-    case 'payment_intent.succeeded':
+    case 'payment_intent.succeeded': {
       const paymentIntent = event.data.object;
       // Handle successful payment intent
       return {
@@ -102,8 +102,9 @@ export const handleWebhookEvent = async (event: any) => {
         status: 'completed',
         amount: paymentIntent.amount / 100, // Convert from cents to actual amount
       };
+    }
     
-    case 'checkout.session.completed':
+    case 'checkout.session.completed': {
       const session = event.data.object;
       // Handle completed checkout session
       return {
@@ -113,6 +114,7 @@ export const handleWebhookEvent = async (event: any) => {
         status: 'completed',
         amount: session.amount_total / 100, // Convert from cents to actual amount
       };
+    }
     
     default:
       // Unhandled event type

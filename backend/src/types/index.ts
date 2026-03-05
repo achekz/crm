@@ -167,6 +167,7 @@ export interface ConversationResponse {
 }
 
 export interface ApiResponse<T = any> {
+  status?: string;
   success: boolean;
   message: string;
   data?: T;

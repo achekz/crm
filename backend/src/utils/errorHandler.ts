@@ -22,8 +22,27 @@ export const sendErrorResponse = (res: Response, err: AppError | Error): Respons
   // Operational, trusted error: send message to client
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
+      status: 'error',
       success: false,
       message: err.message,
+      error: err
+    });
+  }
+
+  if ((err as any).name === 'ValidationError') {
+    return res.status(400).json({
+      status: 'error',
+      success: false,
+      message: `Validation error: ${err.message}`,
+      error: err
+    });
+  }
+
+  if ((err as any).code === 11000) {
+    return res.status(409).json({
+      status: 'error',
+      success: false,
+      message: 'Duplicate field value error',
       error: err
     });
   }
@@ -31,6 +50,7 @@ export const sendErrorResponse = (res: Response, err: AppError | Error): Respons
   // Programming or other unknown error: don't leak error details
   console.error('ERROR 💥', err);
   return res.status(500).json({
+    status: 'error',
     success: false,
     message: 'Something went wrong',
     error: process.env.NODE_ENV === 'development' ? err : undefined
@@ -45,6 +65,7 @@ export const sendSuccessResponse = <T>(
   statusCode = 200
 ): Response => {
   const response: ApiResponse<T> = {
+    status: 'success',
     success: true,
     message,
     data

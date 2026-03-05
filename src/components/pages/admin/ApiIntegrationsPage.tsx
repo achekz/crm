@@ -1,406 +1,399 @@
-import React, { useState } from 'react';
-import { Card, Button, Table, Switch, message, Row, Col, Typography, Modal, Form, Input, Select, Tag } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Button, Table, message, Row, Col, Typography, Modal, Form, Input, Select, Tag, Spin } from 'antd';
 import { 
   ApiOutlined, 
   PlusOutlined, 
   EditOutlined, 
   DeleteOutlined,
-  KeyOutlined,
   LinkOutlined,
   CheckCircleOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  LoadingOutlined
 } from '@ant-design/icons';
+import { 
+  getIntegrations, 
+  getIntegrationStats, 
+  createIntegration, 
+  updateIntegration, 
+  deleteIntegration, 
+  testIntegration,
+  Integration,
+  IntegrationStats 
+} from '../../../services/integrationService';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const ApiIntegrationsPage: React.FC = () => {
+  const [integrations, setIntegrations] = useState<Integration[]>([]);
+  const [stats, setStats] = useState<IntegrationStats | null>(null);
+  const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingIntegration, setEditingIntegration] = useState<any>(null);
+  const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
+  const [testingId, setTestingId] = useState<string | null>(null);
   const [form] = Form.useForm();
 
-  // Mock data for API integrations
-  const integrations = [
-    {
-      id: '1',
-      name: 'Stripe',
-      description: 'Traitement des paiements en ligne',
-      status: 'active',
-      type: 'payment',
-      lastSync: '2024-01-20 14:30',
-      requests: 1247,
-    },
-    {
-      id: '2',
-      name: 'SendGrid',
-      description: 'Envoi d\'emails transactionnels',
-      status: 'active',
-      type: 'email',
-      lastSync: '2024-01-20 15:45',
-      requests: 892,
-    },
-    {
-      id: '3',
-      name: 'Slack',
-      description: 'Notifications d\'équipe',
-      status: 'inactive',
-      type: 'notification',
-      lastSync: '2024-01-18 09:20',
-      requests: 156,
-    },
-    {
-      id: '4',
-      name: 'Google Drive',
-      description: 'Stockage de documents',
-      status: 'active',
-      type: 'storage',
-      lastSync: '2024-01-20 16:10',
-      requests: 445,
-    },
-  ];
+  // Fetch integrations and stats on component mount
+  useEffect(() => {
+    fetchIntegrations();
+    fetchStats();
+  }, []);
 
-  // Mock data for API keys
-  const apiKeys = [
-    {
-      id: '1',
-      name: 'Production API Key',
-      key: 'pk_live_51H...****...xyz',
-      created: '2024-01-15',
-      lastUsed: '2024-01-20 14:30',
-      permissions: ['read', 'write'],
-    },
-    {
-      id: '2',
-      name: 'Development API Key',
-      key: 'pk_test_51H...****...abc',
-      created: '2024-01-10',
-      lastUsed: '2024-01-19 11:20',
-      permissions: ['read'],
-    },
-  ];
-
-  const handleToggleIntegration = (id: string, status: string) => {
-    const newStatus = status === 'active' ? 'inactive' : 'active';
-    message.success(`Intégration ${newStatus === 'active' ? 'activée' : 'désactivée'}`);
-  };
-
-  const handleDeleteIntegration = (id: string) => {
-    Modal.confirm({
-      title: 'Supprimer l\'intégration',
-      content: 'Êtes-vous sûr de vouloir supprimer cette intégration ?',
-      icon: <ExclamationCircleOutlined />,
-      onOk: () => {
-        message.success('Intégration supprimée');
-      },
-    });
-  };
-
-  const handleSubmit = (values: any) => {
-    if (editingIntegration) {
-      message.success('Intégration mise à jour');
-    } else {
-      message.success('Nouvelle intégration ajoutée');
+  const fetchIntegrations = async () => {
+    try {
+      setLoading(true);
+      const data = await getIntegrations();
+      setIntegrations(data);
+    } catch (error) {
+      message.error('Failed to fetch integrations');
+      console.error('Error fetching integrations:', error);
+    } finally {
+      setLoading(false);
     }
-    setModalVisible(false);
+  };
+
+  const fetchStats = async () => {
+    try {
+      const data = await getIntegrationStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Error fetching integration stats:', error);
+    }
+  };
+
+  const handleCreate = () => {
     setEditingIntegration(null);
     form.resetFields();
+    setModalVisible(true);
   };
 
-  const handleGenerateApiKey = () => {
+  const handleEdit = (record: Integration) => {
+    setEditingIntegration(record);
+    form.setFieldsValue({
+      name: record.name,
+      description: record.description,
+      type: record.type,
+      status: record.status
+    });
+    setModalVisible(true);
+  };
+
+  const handleDelete = async (id: string) => {
     Modal.confirm({
-      title: 'Générer une nouvelle clé API',
-      content: 'Une nouvelle clé API va être générée. Voulez-vous continuer ?',
-      onOk: () => {
-        message.success('Nouvelle clé API générée');
-      },
+      title: 'Delete Integration',
+      content: 'Are you sure you want to delete this integration?',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk: async () => {
+        try {
+          await deleteIntegration(id);
+          message.success('Integration deleted successfully');
+          fetchIntegrations();
+          fetchStats();
+        } catch (error) {
+          message.error('Failed to delete integration');
+        }
+      }
     });
   };
 
-  const integrationColumns = [
+  const handleTest = async (id: string) => {
+    try {
+      setTestingId(id);
+      const result = await testIntegration(id);
+
+      if (!result) {
+        message.error('Integration test failed');
+        return;
+      }
+
+      if (result.testResult.success) {
+        message.success(result.testResult.message);
+      } else {
+        message.error(result.testResult.message);
+      }
+      
+      // Refresh integrations to show updated status
+      fetchIntegrations();
+    } catch (error) {
+      message.error('Failed to test integration');
+    } finally {
+      setTestingId(null);
+    }
+  };
+
+  const handleModalOk = async () => {
+    try {
+      const values = await form.validateFields();
+      
+      if (editingIntegration) {
+        // Update existing integration
+        await updateIntegration(editingIntegration.id, values);
+        message.success('Integration updated successfully');
+      } else {
+        // Create new integration
+        await createIntegration(values);
+        message.success('Integration created successfully');
+      }
+      
+      setModalVisible(false);
+      form.resetFields();
+      fetchIntegrations();
+      fetchStats();
+    } catch (error) {
+      console.error('Error saving integration:', error);
+      message.error('Failed to save integration');
+    }
+  };
+
+  const handleModalCancel = () => {
+    setModalVisible(false);
+    form.resetFields();
+    setEditingIntegration(null);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'green';
+      case 'inactive':
+        return 'gray';
+      case 'error':
+        return 'red';
+      default:
+        return 'default';
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'payment':
+        return '💳';
+      case 'email':
+        return '📧';
+      case 'notification':
+        return '🔔';
+      case 'storage':
+        return '💾';
+      case 'calendar':
+        return '📅';
+      case 'crm':
+        return '👥';
+      default:
+        return '🔗';
+    }
+  };
+
+  const columns = [
     {
-      title: 'Service',
-      key: 'service',
-      render: (record: any) => (
-        <div className="flex items-center">
-          <ApiOutlined className="mr-2 text-blue-600" />
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string, record: Integration) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>{getTypeIcon(record.type)}</span>
           <div>
-            <Text strong>{record.name}</Text>
-            <br />
-            <Text type="secondary" className="text-sm">{record.description}</Text>
+            <div style={{ fontWeight: 500 }}>{text}</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>{record.description}</div>
           </div>
         </div>
-      ),
+      )
     },
     {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      render: (type: string) => {
-        const colors = {
-          payment: 'green',
-          email: 'blue',
-          notification: 'orange',
-          storage: 'purple',
-        };
-        return <Tag color={colors[type as keyof typeof colors]}>{type}</Tag>;
-      },
+      render: (type: string) => (
+        <Tag color="blue">{type.toUpperCase()}</Tag>
+      )
     },
     {
-      title: 'Statut',
+      title: 'Status',
+      dataIndex: 'status',
       key: 'status',
-      render: (record: any) => (
-        <Switch
-          checked={record.status === 'active'}
-          onChange={() => handleToggleIntegration(record.id, record.status)}
-          checkedChildren="Actif"
-          unCheckedChildren="Inactif"
-        />
-      ),
+      render: (status: string) => (
+        <Tag color={getStatusColor(status)}>
+          {status === 'active' && <CheckCircleOutlined />} 
+          {status === 'error' && <ExclamationCircleOutlined />}
+          {status.toUpperCase()}
+        </Tag>
+      )
     },
     {
-      title: 'Dernière sync',
-      dataIndex: 'lastSync',
-      key: 'lastSync',
-    },
-    {
-      title: 'Requêtes',
+      title: 'Requests',
       dataIndex: 'requests',
       key: 'requests',
-      render: (requests: number) => requests.toLocaleString(),
+      render: (requests: number) => requests.toLocaleString()
+    },
+    {
+      title: 'Last Sync',
+      dataIndex: 'lastSync',
+      key: 'lastSync',
+      render: (date: string) => new Date(date).toLocaleString()
     },
     {
       title: 'Actions',
       key: 'actions',
-      render: (record: any) => (
-        <div className="space-x-2">
-          <Button 
-            type="text" 
-            icon={<EditOutlined />}
-            onClick={() => {
-              setEditingIntegration(record);
-              setModalVisible(true);
-              form.setFieldsValue(record);
-            }}
+      render: (_: any, record: Integration) => (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            size="small"
+            icon={testingId === record.id ? <LoadingOutlined /> : <LinkOutlined />}
+            onClick={() => handleTest(record.id)}
+            disabled={testingId === record.id}
           >
-            Modifier
+            Test
           </Button>
-          <Button 
-            type="text" 
-            danger 
-            icon={<DeleteOutlined />}
-            onClick={() => handleDeleteIntegration(record.id)}
+          <Button
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
           >
-            Supprimer
+            Edit
+          </Button>
+          <Button
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record.id)}
+          >
+            Delete
           </Button>
         </div>
-      ),
-    },
+      )
+    }
   ];
 
-  const apiKeyColumns = [
-    {
-      title: 'Nom',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Clé',
-      dataIndex: 'key',
-      key: 'key',
-      render: (key: string) => (
-        <Text code className="text-sm">{key}</Text>
-      ),
-    },
-    {
-      title: 'Permissions',
-      dataIndex: 'permissions',
-      key: 'permissions',
-      render: (permissions: string[]) => (
-        <div>
-          {permissions.map(permission => (
-            <Tag key={permission} color="blue">{permission}</Tag>
-          ))}
-        </div>
-      ),
-    },
-    {
-      title: 'Créée le',
-      dataIndex: 'created',
-      key: 'created',
-    },
-    {
-      title: 'Dernière utilisation',
-      dataIndex: 'lastUsed',
-      key: 'lastUsed',
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: () => (
-        <Button type="text" danger icon={<DeleteOutlined />}>
-          Révoquer
-        </Button>
-      ),
-    },
-  ];
+  if (loading) {
+    return (
+      <div style={{ padding: '24px', textAlign: 'center' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div className="page-header">
-        <Title level={2}>API & Intégrations</Title>
-        <Text type="secondary">Gérez vos intégrations et clés API</Text>
+    <div style={{ padding: '24px' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <Title level={2}>
+          <ApiOutlined /> API & Integrations
+        </Title>
+        <Text type="secondary">Manage your third-party integrations and API connections</Text>
       </div>
 
-      {/* API Status Overview */}
-      <Row gutter={16} className="mb-6">
-        <Col span={6}>
-          <Card className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <CheckCircleOutlined className="text-2xl text-green-600" />
-            </div>
-            <Text strong className="text-lg">4</Text>
-            <br />
-            <Text type="secondary">Intégrations actives</Text>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <ApiOutlined className="text-2xl text-blue-600" />
-            </div>
-            <Text strong className="text-lg">2,740</Text>
-            <br />
-            <Text type="secondary">Requêtes ce mois</Text>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <KeyOutlined className="text-2xl text-purple-600" />
-            </div>
-            <Text strong className="text-lg">2</Text>
-            <br />
-            <Text type="secondary">Clés API actives</Text>
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <LinkOutlined className="text-2xl text-orange-600" />
-            </div>
-            <Text strong className="text-lg">99.9%</Text>
-            <br />
-            <Text type="secondary">Disponibilité</Text>
-          </Card>
-        </Col>
-      </Row>
+      {/* Statistics Overview */}
+      {stats && (
+        <Row gutter={16} style={{ marginBottom: '24px' }}>
+          <Col span={6}>
+            <Card>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1890ff' }}>
+                  {stats.overall.totalIntegrations || 0}
+                </div>
+                <Text type="secondary">Total Integrations</Text>
+              </div>
+            </Card>
+          </Col>
+          <Col span={6}>
+            <Card>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#52c41a' }}>
+                  {stats.overall.activeIntegrations || 0}
+                </div>
+                <Text type="secondary">Active Integrations</Text>
+              </div>
+            </Card>
+          </Col>
+          <Col span={6}>
+            <Card>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#faad14' }}>
+                  {stats.overall.totalRequests || 0}
+                </div>
+                <Text type="secondary">Total Requests</Text>
+              </div>
+            </Card>
+          </Col>
+          <Col span={6}>
+            <Card>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#722ed1' }}>
+                  {stats.overall.totalMonthlyRequests || 0}
+                </div>
+                <Text type="secondary">Monthly Requests</Text>
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      )}
 
-      {/* Integrations */}
-      <Card 
-        title="Intégrations"
-        extra={
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setEditingIntegration(null);
-              setModalVisible(true);
-              form.resetFields();
-            }}
-          >
-            Ajouter une intégration
-          </Button>
-        }
-        className="mb-6"
-      >
-        <Table
-          dataSource={integrations}
-          columns={integrationColumns}
-          rowKey="id"
-          pagination={false}
-        />
-      </Card>
+      {/* Actions */}
+      <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+          Add Integration
+        </Button>
+      </div>
 
-      {/* API Keys */}
-      <Card 
-        title="Clés API"
-        extra={
-          <Button 
-            type="primary" 
-            icon={<KeyOutlined />}
-            onClick={handleGenerateApiKey}
-          >
-            Générer une clé
-          </Button>
-        }
-      >
-        <Table
-          dataSource={apiKeys}
-          columns={apiKeyColumns}
-          rowKey="id"
-          pagination={false}
-        />
-      </Card>
+      {/* Integrations Table */}
+      <Table
+        columns={columns}
+        dataSource={integrations}
+        rowKey="id"
+        pagination={{ pageSize: 10 }}
+        loading={loading}
+      />
 
-      {/* Integration Modal */}
+      {/* Modal for Create/Edit */}
       <Modal
-        title={editingIntegration ? 'Modifier l\'intégration' : 'Nouvelle intégration'}
-        open={modalVisible}
-        onCancel={() => {
-          setModalVisible(false);
-          setEditingIntegration(null);
-          form.resetFields();
-        }}
-        onOk={() => form.submit()}
+        title={editingIntegration ? 'Edit Integration' : 'Add Integration'}
+        visible={modalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        width={600}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-        >
+        <Form form={form} layout="vertical">
           <Form.Item
             name="name"
-            label="Nom du service"
-            rules={[{ required: true, message: 'Le nom est requis' }]}
+            label="Integration Name"
+            rules={[{ required: true, message: 'Please enter integration name' }]}
           >
-            <Input />
+            <Input placeholder="e.g., Stripe, SendGrid, Slack" />
           </Form.Item>
-
+          
           <Form.Item
             name="description"
             label="Description"
-            rules={[{ required: true, message: 'La description est requise' }]}
+            rules={[{ required: true, message: 'Please enter description' }]}
           >
-            <Input.TextArea rows={3} />
+            <Input.TextArea placeholder="Brief description of the integration" rows={3} />
           </Form.Item>
-
+          
           <Form.Item
             name="type"
-            label="Type d'intégration"
-            rules={[{ required: true, message: 'Le type est requis' }]}
+            label="Integration Type"
+            rules={[{ required: true, message: 'Please select integration type' }]}
           >
-            <Select>
-              <Option value="payment">Paiement</Option>
+            <Select placeholder="Select integration type">
+              <Option value="payment">Payment</Option>
               <Option value="email">Email</Option>
               <Option value="notification">Notification</Option>
-              <Option value="storage">Stockage</Option>
-              <Option value="analytics">Analytics</Option>
+              <Option value="storage">Storage</Option>
+              <Option value="calendar">Calendar</Option>
+              <Option value="crm">CRM</Option>
             </Select>
           </Form.Item>
-
+          
           <Form.Item
-            name="apiKey"
-            label="Clé API"
-            rules={[{ required: true, message: 'La clé API est requise' }]}
+            name="status"
+            label="Status"
+            rules={[{ required: true, message: 'Please select status' }]}
           >
-            <Input.Password placeholder="Entrez votre clé API" />
-          </Form.Item>
-
-          <Form.Item
-            name="webhookUrl"
-            label="URL de webhook (optionnel)"
-          >
-            <Input placeholder="https://votre-domaine.com/webhook" />
+            <Select placeholder="Select status">
+              <Option value="active">Active</Option>
+              <Option value="inactive">Inactive</Option>
+              <Option value="error">Error</Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

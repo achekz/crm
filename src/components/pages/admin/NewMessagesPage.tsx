@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Card,
   List,
@@ -10,8 +10,18 @@ import {
   Space,
   Spin,
   notification,
+  Image,
+  Tooltip,
 } from "antd";
-import { SendOutlined, UserOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  SendOutlined,
+  UserOutlined,
+  PlusOutlined,
+  PaperClipOutlined,
+  FileOutlined,
+  LoadingOutlined,
+  DownloadOutlined,
+} from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../../../store";
 import { useSocket } from "../../../hooks/useSocket";
@@ -46,7 +56,9 @@ const MessagesPage: React.FC = () => {
   );
   const [newMessage, setNewMessage] = useState("");
   const [showAvailableClients, setShowAvailableClients] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch initial data
   useEffect(() => {
@@ -104,75 +116,68 @@ const MessagesPage: React.FC = () => {
   useEffect(() => {
     if (!user) return;
 
-    const handleNewMessage = (message: Message) => {
+    const handleNewMessage = (message: Message & { tempId?: string }) => {
       console.log("🔔 Real-time message received:", message);
 
-      // Always refresh conversations to update the conversation list
+      // Always refresh conversations to update the conversation list (last message preview)
       dispatch(fetchConversations());
 
       // Only add to local state if it's for the current active conversation
       if (message.conversationId === activeConversation) {
         console.log("✅ Adding message to current conversation");
         setConversationMessages((prev) => {
-          console.log("📦 Previous messages count:", prev.length);
-
-          // Check if this is replacing a temporary/optimistic message
-          const tempMessageExists = prev.some(
-            (m) =>
-              m.content === message.content && m.id && m.id.startsWith("temp_")
-          );
-
-          if (tempMessageExists) {
-            // Replace temporary message with real one
-            console.log("🔄 Replacing temporary message with real one");
-            const withoutTemp = prev.filter(
-              (m) =>
-                !(
-                  m.content === message.content &&
-                  m.id &&
-                  m.id.startsWith("temp_")
-                )
-            );
-            return [...withoutTemp, message].sort(
-              (a, b) =>
-                new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime()
-            );
-          }
-
-          // Check if message already exists (avoid duplicates)
+          // Check for duplicate by ID
           const exists = prev.some((m) => m.id === message.id);
           if (exists) {
             console.log("📝 Message already exists, skipping...");
             return prev;
           }
 
+          // Check if this replaces a temporary message (optimistic update)
+          if (message.tempId) {
+             const tempExists = prev.some(m => m.id === message.tempId);
+             if (tempExists) {
+               console.log("🔄 Replacing temporary message with real one");
+               return prev.map(m => m.id === message.tempId ? message : m);
+             }
+          }
+
+          // Fallback: Check if there's a temp message with same content (legacy check)
+          const legacyTempMatch = prev.find(
+            (m) =>
+              m.content === message.content &&
+              m.id &&
+              m.id.startsWith("temp_") &&
+              m.senderId.id === message.senderId.id &&
+              Math.abs(new Date(m.timestamp).getTime() - new Date(message.timestamp).getTime()) < 5000 // Within 5 seconds
+          );
+
+          if (legacyTempMatch) {
+             console.log("🔄 Replacing temporary message (legacy match)");
+             return prev.map(m => m.id === legacyTempMatch.id ? message : m);
+          }
+
           console.log("➕ Adding new message to conversation");
-          // Sort messages by timestamp to maintain order
-          const newMessages = [...prev, message].sort(
+          return [...prev, message].sort(
             (a, b) =>
               new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
           );
-          console.log("📈 New messages count:", newMessages.length);
-          return newMessages;
         });
-      } else {
-        console.log("❌ Message not for current conversation");
       }
     };
 
-    // Use the already imported socketService
-    socketService.onNewMessage(handleNewMessage);
-    socketService.onMessageSent(({ message }: { message: Message }) => {
-      console.log("✅ Message sent confirmation received:", message);
-      // Handle sent messages the same way as new messages
-      handleNewMessage(message);
-    });
+    // Define handlers
+    const onNewMessageHandler = (msg: Message) => handleNewMessage(msg);
+    const onMessageSentHandler = (data: { message: Message }) => handleNewMessage(data.message);
+
+    // Register listeners
+    socketService.onNewMessage(onNewMessageHandler);
+    socketService.onMessageSent(onMessageSentHandler);
 
     return () => {
-      // Cleanup listeners
-      socketService.off("message:new");
-      socketService.off("message:sent");
+      // Cleanup SPECIFIC listeners to avoid removing global listeners from useSocket
+      socketService.off("message:new", onNewMessageHandler);
+      socketService.off("message:sent", onMessageSentHandler);
     };
   }, [activeConversation, user, dispatch]);
 
@@ -218,20 +223,31 @@ const MessagesPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !activeConversation) return;
+  const handleSendMessage = async (fileData?: {
+    fileUrl: string;
+    fileName: string;
+    messageType: "file" | "image";
+  }) => {
+    if ((!newMessage.trim() && !fileData) || !activeConversation) return;
 
     // Use activeConversationData instead of searching in conversations array
     if (!activeConversationData) return;
 
     try {
       // Store the message content before clearing the input
-      const messageContent = newMessage.trim();
-      setNewMessage("");
+      const messageContent = fileData
+        ? `Sent a ${fileData.messageType}: ${fileData.fileName}`
+        : newMessage.trim();
+      
+      if (!fileData) {
+        setNewMessage("");
+      }
+
+      const tempId = `temp_${Date.now()}`;
 
       // Create optimistic message
       const optimisticMessage: Message = {
-        id: `temp_${Date.now()}`,
+        id: tempId,
         senderId: {
           id: user?.id || "",
           name: user?.name || "",
@@ -246,18 +262,19 @@ const MessagesPage: React.FC = () => {
         },
         conversationId: activeConversation,
         content: messageContent,
-        messageType: "text",
+        messageType: fileData ? fileData.messageType : "text",
+        fileName: fileData?.fileName,
+        fileUrl: fileData?.fileUrl,
         timestamp: new Date().toISOString(),
         read: false,
       };
 
       // Add optimistic message immediately
       setConversationMessages((prev) => {
-        const newMessages = [...prev, optimisticMessage].sort(
+        return [...prev, optimisticMessage].sort(
           (a, b) =>
             new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );
-        return newMessages;
       });
 
       // Send the message via socket
@@ -265,11 +282,16 @@ const MessagesPage: React.FC = () => {
         "🚀 Sending message via socket to:",
         activeConversationData.otherUser.id
       );
+      
       await sendMessage({
         receiverId: activeConversationData.otherUser.id,
         content: messageContent,
-        messageType: "text",
+        messageType: fileData ? fileData.messageType : "text",
+        fileName: fileData?.fileName,
+        fileUrl: fileData?.fileUrl,
+        tempId: tempId, // Pass tempId to backend
       });
+      
       console.log("✅ Message sent successfully");
 
       // Refresh conversations to update the last message
@@ -295,18 +317,6 @@ const MessagesPage: React.FC = () => {
   };
 
   const getConversationMessages = () => {
-    console.log(
-      "📋 Getting conversation messages:",
-      conversationMessages.length
-    );
-    console.log(
-      "📝 Messages:",
-      conversationMessages.map((m) => ({
-        id: m.id,
-        content: m.content?.substring(0, 20),
-        timestamp: m.timestamp,
-      }))
-    );
     return conversationMessages;
   };
 
@@ -341,6 +351,128 @@ const MessagesPage: React.FC = () => {
     return clients.filter(
       (client) => !conversationClientIds.includes(client.id)
     );
+  };
+
+  const getMessageDate = (message: Message) => {
+    return message.timestamp || message.createdAt || new Date().toISOString();
+  };
+
+  const formatMessageTime = (timestamp: string) => {
+    try {
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) {
+        return "";
+      }
+
+      const now = new Date();
+      const isToday =
+        date.getDate() === now.getDate() &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear();
+
+      if (isToday) {
+        return date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
+    } catch (e) {
+      return "";
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setIsUploading(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        const messageType = file.type.startsWith("image/") ? "image" : "file";
+        await handleSendMessage({
+          fileUrl: data.data.fileUrl,
+          fileName: data.data.fileName,
+          messageType,
+        });
+      } else {
+        throw new Error(data.message || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      notification.error({
+        message: "Erreur",
+        description: "Échec de l'envoi du fichier",
+      });
+    } finally {
+      setIsUploading(false);
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const renderMessageContent = (message: Message) => {
+    if (message.messageType === "image" && message.fileUrl) {
+      const imageUrl = message.fileUrl.startsWith("http") 
+        ? message.fileUrl 
+        : `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}${message.fileUrl}`;
+      
+      return (
+        <div className="message-image-container">
+          <Image
+            src={imageUrl}
+            alt="Image partagée"
+            style={{ maxWidth: "200px", borderRadius: "8px" }}
+          />
+        </div>
+      );
+    } else if (message.messageType === "file" && message.fileUrl) {
+      const fileUrl = message.fileUrl.startsWith("http")
+        ? message.fileUrl
+        : `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}${message.fileUrl}`;
+        
+      return (
+        <div className="message-file-container">
+          <a 
+            href={fileUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
+            <FileOutlined style={{ fontSize: '24px' }} />
+            <div>
+              <div style={{ fontWeight: 500 }}>{message.fileName || "Fichier joint"}</div>
+              <div style={{ fontSize: '11px', color: '#666' }}>Cliquez pour télécharger</div>
+            </div>
+            <DownloadOutlined />
+          </a>
+        </div>
+      );
+    }
+    
+    return <div className="message-text">{message.content}</div>;
   };
 
   return (
@@ -487,7 +619,11 @@ const MessagesPage: React.FC = () => {
                         description={
                           conversation.lastMessage ? (
                             <Text ellipsis className="last-message">
-                              {conversation.lastMessage.content}
+                              {conversation.lastMessage.messageType === "image" 
+                                ? "📷 Image" 
+                                : conversation.lastMessage.messageType === "file" 
+                                  ? "📎 Fichier" 
+                                  : conversation.lastMessage.content}
                             </Text>
                           ) : (
                             <Text type="secondary">Aucun message</Text>
@@ -496,12 +632,7 @@ const MessagesPage: React.FC = () => {
                       />
                       {conversation.lastMessage && (
                         <Text type="secondary" className="message-time">
-                          {new Date(
-                            conversation.lastMessage.timestamp
-                          ).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {formatMessageTime(getMessageDate(conversation.lastMessage))}
                         </Text>
                       )}
                     </List.Item>
@@ -556,25 +687,18 @@ const MessagesPage: React.FC = () => {
                       <div
                         key={message.id}
                         className={`message ${
-                          message.senderId.role === "admin"
-                            ? "admin-message"
-                            : "client-message"
+                          message.senderId.id === user?.id
+                            ? "my-message"
+                            : "other-message"
                         }`}
                       >
                         <div className="message-content">
-                          <div className="message-text">{message.content}</div>
+                          {renderMessageContent(message)}
                           <div className="message-meta">
                             <span className="message-time">
-                              {new Date(message.timestamp).toLocaleTimeString(
-                                [],
-                                {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
-                              )}
+                              {formatMessageTime(getMessageDate(message))}
                             </span>
-                            {message.senderId.role === "admin" &&
-                              message.senderId.id === user?.id && (
+                            {message.senderId.id === user?.id && (
                                 <span className="message-status">
                                   {message.read ? "✓✓" : "✓"}
                                 </span>
@@ -591,6 +715,22 @@ const MessagesPage: React.FC = () => {
 
               {/* Message Input */}
               <div className="message-input">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleFileUpload}
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                />
+                <Tooltip title="Joindre un fichier">
+                  <Button
+                    icon={isUploading ? <LoadingOutlined /> : <PaperClipOutlined />}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mr-2"
+                    disabled={!isConnected() || isUploading}
+                  />
+                </Tooltip>
+                
                 <TextArea
                   value={newMessage}
                   onChange={(e) => handleTyping(e.target.value)}
@@ -602,13 +742,13 @@ const MessagesPage: React.FC = () => {
                       handleSendMessage();
                     }
                   }}
-                  disabled={!isConnected()}
+                  disabled={!isConnected() || isUploading}
                 />
                 <Button
                   type="primary"
                   icon={<SendOutlined />}
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim() || !isConnected()}
+                  onClick={() => handleSendMessage()}
+                  disabled={!newMessage.trim() || !isConnected() || isUploading}
                 >
                   Envoyer
                 </Button>

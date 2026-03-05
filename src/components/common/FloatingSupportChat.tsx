@@ -32,7 +32,7 @@ const formatMessageDate = (dateString: string): { time: string; date: string } =
     if (isNaN(date.getTime())) {
       return {
         time: '--:--',
-        date: 'Today'
+        date: 'Aujourd\'hui'
       };
     }
     
@@ -42,6 +42,14 @@ const formatMessageDate = (dateString: string): { time: string; date: string } =
       minute: '2-digit',
       hour12: false  // Use 24-hour format
     });
+    
+    // Check if time is valid (not "Invalid Date")
+    if (time === 'Invalid Date') {
+       return {
+        time: '--:--',
+        date: 'Aujourd\'hui'
+      };
+    }
     
     // Format date - if today, show "Today", if this year show day/month, else show full date
     const today = new Date();
@@ -53,7 +61,7 @@ const formatMessageDate = (dateString: string): { time: string; date: string } =
     
     let formattedDate;
     if (isToday) {
-      formattedDate = 'Today';
+      formattedDate = 'Aujourd\'hui';
     } else if (isThisYear) {
       formattedDate = date.toLocaleDateString([], { 
         day: '2-digit', 
@@ -72,7 +80,7 @@ const formatMessageDate = (dateString: string): { time: string; date: string } =
     console.error('Error formatting date:', error, dateString);
     return { 
       time: '--:--', 
-      date: 'Today' 
+      date: 'Aujourd\'hui' 
     };
   }
 };

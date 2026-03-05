@@ -27,30 +27,6 @@ interface QuotesState {
   selectedQuote: Quote | null;
 }
 
-const mockQuotes: Quote[] = [
-  {
-    id: '1',
-    number: 'DEV-2024-001',
-    clientId: '1',
-    clientName: 'Jean Dupont',
-    date: '2024-01-10',
-    validUntil: '2024-02-10',
-    status: 'accepted',
-    items: [
-      {
-        id: '1',
-        description: 'Développement application web',
-        quantity: 40,
-        unitPrice: 800,
-        total: 32000,
-      },
-    ],
-    subtotal: 32000,
-    tax: 6400,
-    total: 38400,
-  },
-];
-
 const initialState: QuotesState = {
   quotes: [],
   loading: false,

@@ -3,6 +3,7 @@ import { Server as HttpServer } from "http";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 import Message from "../models/Message";
+import { logError, logInfo } from "./logger";
 
 interface AuthenticatedSocket extends Socket {
   user?: {
@@ -17,6 +18,11 @@ interface AuthenticatedSocket extends Socket {
 const activeUsers = new Map<string, string>(); // userId -> socketId
 
 export const initializeSocket = (httpServer: HttpServer) => {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error("JWT_SECRET environment variable is not configured");
+  }
+
   const io = new Server(httpServer, {
     cors: {
       // Allow any localhost origin in development
@@ -47,7 +53,7 @@ export const initializeSocket = (httpServer: HttpServer) => {
         return next(new Error("No token provided"));
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      const decoded = jwt.verify(token, jwtSecret) as {
         id: string;
       };
       const user = await User.findById(decoded.id).select("-password");
@@ -65,7 +71,7 @@ export const initializeSocket = (httpServer: HttpServer) => {
 
       next();
     } catch (err) {
-      console.error("Socket authentication error:", err);
+      logError("Socket authentication failed", err);
       next(new Error("Authentication failed"));
     }
   });
@@ -73,7 +79,12 @@ export const initializeSocket = (httpServer: HttpServer) => {
   io.on("connection", (socket: AuthenticatedSocket) => {
     if (!socket.user) return;
 
-    console.log(`User ${socket.user.name} connected`);
+    logInfo("Socket client connected", {
+      userId: socket.user.id,
+      userName: socket.user.name,
+      role: socket.user.role,
+      socketId: socket.id,
+    });
 
     // Store user connection
     activeUsers.set(socket.user.id, socket.id);
@@ -91,17 +102,19 @@ export const initializeSocket = (httpServer: HttpServer) => {
     // Handle joining conversation rooms
     socket.on("join:conversation", (conversationId: string) => {
       socket.join(conversationId);
-      console.log(
-        `User ${socket.user?.name} joined conversation ${conversationId}`
-      );
+      logInfo("Socket joined conversation", {
+        userId: socket.user?.id,
+        conversationId,
+      });
     });
 
     // Handle leaving conversation rooms
     socket.on("leave:conversation", (conversationId: string) => {
       socket.leave(conversationId);
-      console.log(
-        `User ${socket.user?.name} left conversation ${conversationId}`
-      );
+      logInfo("Socket left conversation", {
+        userId: socket.user?.id,
+        conversationId,
+      });
     });
 
     // Handle sending messages
@@ -153,12 +166,15 @@ export const initializeSocket = (httpServer: HttpServer) => {
           io.to(conversationId).emit("message:new", {
             ...message.toObject(),
             conversationId,
+            tempId: data.tempId, // Pass tempId back so sender can de-duplicate
           });
 
           // Also emit specifically to sender's socket to ensure they get the update
+          // (Redundant if sender is in room, but good for reliability)
           socket.emit("message:new", {
             ...message.toObject(),
             conversationId,
+            tempId: data.tempId,
           });
 
           // Ensure receiver is in the conversation room
@@ -167,9 +183,10 @@ export const initializeSocket = (httpServer: HttpServer) => {
             const receiverSocket = io.sockets.sockets.get(receiverSocketId);
             if (receiverSocket) {
               receiverSocket.join(conversationId);
-              console.log(
-                `Auto-joined receiver to conversation ${conversationId}`
-              );
+              logInfo("Receiver auto-joined conversation", {
+                receiverId,
+                conversationId,
+              });
             }
           }
 
@@ -190,7 +207,10 @@ export const initializeSocket = (httpServer: HttpServer) => {
             },
           });
         } catch (error) {
-          console.error("Error sending message:", error);
+          logError("Socket message send failed", error, {
+            senderId: socket.user?.id,
+            receiverId: data.receiverId,
+          });
           socket.emit("message:error", { error: "Failed to send message" });
         }
       }
@@ -241,7 +261,10 @@ export const initializeSocket = (httpServer: HttpServer) => {
             count: result.modifiedCount,
           });
         } catch (error) {
-          console.error("Error marking messages as read:", error);
+          logError("Socket message read update failed", error, {
+            userId: socket.user?.id,
+            conversationId: data.conversationId,
+          });
           socket.emit("message:error", {
             error: "Failed to mark messages as read",
           });
@@ -279,7 +302,12 @@ export const initializeSocket = (httpServer: HttpServer) => {
     socket.on("disconnect", () => {
       if (!socket.user) return;
 
-      console.log(`User ${socket.user.name} disconnected`);
+      logInfo("Socket client disconnected", {
+        userId: socket.user.id,
+        userName: socket.user.name,
+        role: socket.user.role,
+        socketId: socket.id,
+      });
 
       // Remove from active users
       activeUsers.delete(socket.user.id);

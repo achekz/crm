@@ -3,7 +3,6 @@ import axios from 'axios';
 
 // API paths for clients
 const API_URL = '/api/clients';
-const AUTH_API_URL = '/api/auth';
 
 // Function to get the base API URL (helpful for debugging)
 export const getApiBaseUrl = () => {

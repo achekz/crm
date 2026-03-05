@@ -102,19 +102,7 @@
   transform: translateY(0) !important;
 }
 
-/* Demo buttons */
-.demo-button {
-  border-radius: 12px !important;
-  height: 44px !important;
-  font-weight: 500 !important;
-  transition: all 0.3s ease !important;
-  border: 2px solid !important;
-}
-
-.demo-button:hover {
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
-}
+/* Demo buttons removed */
 
 .app {
   min-height: 100vh;

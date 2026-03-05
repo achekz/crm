@@ -3,6 +3,7 @@ import { google } from 'googleapis';
 import { AppError, sendSuccessResponse } from '../utils/errorHandler';
 import { AuthRequest } from '../types';
 import User from '../models/User';
+import { logError } from '../utils/logger';
 
 // Google Calendar API setup
 const oauth2Client = new google.auth.OAuth2(
@@ -57,7 +58,7 @@ export const handleCallback = async (req: AuthRequest, res: Response, next: Next
     // Redirect to frontend with success message
     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/invoices?calendar=success`);
   } catch (error) {
-    console.error('Google Calendar callback error:', error);
+    logError('Google Calendar callback failed', error, { userId: req.user?.id });
     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/invoices?calendar=error`);
   }
 };
@@ -134,7 +135,7 @@ Système CRM - CMT`,
       eventUrl: calendarEvent.data.htmlLink 
     }, 'Invoice added to Google Calendar successfully');
   } catch (error) {
-    console.error('Google Calendar add invoice error:', error);
+    logError('Google Calendar add invoice failed', error, { userId: req.user?.id });
     next(error);
   }
 };

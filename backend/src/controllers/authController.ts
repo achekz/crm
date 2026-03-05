@@ -28,7 +28,7 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return next(new AppError('Email already in use', 400));
+      return next(new AppError('Email already in use', 409));
     }
 
     // Validate that regime_fiscal is only set for personne_physique
@@ -97,7 +97,7 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
       token
     };
 
-    sendSuccessResponse(res, responseData, 'Registration successful', 201);
+    sendSuccessResponse(res, responseData, 'User registered successfully', 201);
   } catch (error) {
     next(error);
   }
@@ -119,6 +119,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     // Check if user exists and password is correct
     if (!user || !(await user.comparePassword(password))) {
       return next(new AppError('Incorrect email or password', 401));
+    }
+
+    if (user.status === 'inactive') {
+      return next(new AppError('Account is not active', 401));
     }
 
     // Generate JWT token

@@ -8,14 +8,19 @@ export const generateToken = (user: IUser): string => {
     role: user.role 
   };
   
-  const jwtSecret = process.env.JWT_SECRET || 'your_jwt_secret_key_here';
-  const expiresIn = process.env.JWT_EXPIRES_IN || '30d';
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('JWT_SECRET environment variable is not configured');
+  }
   
-  // @ts-ignore - Ignoring TypeScript error for jwt.sign 
+  const expiresIn = (process.env.JWT_EXPIRES_IN || '30d') as jwt.SignOptions['expiresIn'];
   return jwt.sign(payload, jwtSecret, { expiresIn });
 };
 
 export const verifyToken = (token: string): jwt.JwtPayload | string => {
-  const jwtSecret = process.env.JWT_SECRET || 'your_jwt_secret_key_here';
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('JWT_SECRET environment variable is not configured');
+  }
   return jwt.verify(token, jwtSecret);
 }; 

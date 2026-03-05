@@ -46,10 +46,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slides, currentSlide, setCurr
                   <span>Découvrir nos solutions</span>
                   <ArrowRight size={11} />
                 </Link>
-                <button className="cta-button secondary">
-                  <Play size={13} />
-                  <span>Voir la démo</span>
-                </button>
               </div>
             </div>
           </div>

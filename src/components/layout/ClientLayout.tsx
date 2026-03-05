@@ -310,8 +310,8 @@ const ClientLayout: React.FC = () => {
               <CrownOutlined className="text-white text-lg" />
             </div>
             <div>
-              <div className="font-bold text-lg text-gray-800">ERP Pro</div>
-              <div className="text-xs text-gray-500">Client Portal</div>
+              <div className="font-bold text-lg text-gray-800">CMT Expertise</div>
+              <div className="text-xs text-gray-500">Espace Client</div>
             </div>
           </div>
         }
@@ -350,8 +350,8 @@ const ClientLayout: React.FC = () => {
                 <CrownOutlined className="text-white text-xl" />
               </div>
               <div>
-                <div className="text-white font-bold text-xl">ERP Pro</div>
-                <div className="text-teal-200 text-sm">Client Portal</div>
+                <div className="text-white font-bold text-xl">CMT Expertise</div>
+                <div className="text-teal-200 text-sm">Espace Client</div>
               </div>
             </div>
           )}

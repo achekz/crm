@@ -65,16 +65,6 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const loginAsAdmin = () => {
-    form.setFieldsValue({ email: 'admin@erp.com', password: 'admin123', remember: true });
-    onFinish({ email: 'admin@erp.com', password: 'admin123', remember: true });
-  };
-
-  const loginAsClient = () => {
-    form.setFieldsValue({ email: 'jean.dupont@email.com', password: 'client123', remember: true });
-    onFinish({ email: 'jean.dupont@email.com', password: 'client123', remember: true });
-  };
-
   const features = [
     {
       icon: <SafetyOutlined className="text-teal-600" />,
@@ -156,52 +146,52 @@ const LoginPage: React.FC = () => {
         </div>
       )}
 
-      <div className="w-full max-w-7xl mx-auto grid lg:grid-cols-5 gap-16 items-center relative z-10">
+      <div className="w-full max-w-7xl mx-auto grid lg:grid-cols-5 gap-12 items-center relative z-10">
         {/* Left side - Branding and features */}
-        <div className="hidden lg:block lg:col-span-3 space-y-10 animate-fade-in pr-8">
+        <div className="hidden lg:block lg:col-span-3 space-y-6 animate-fade-in pr-4">
           {/* Main branding section */}
-          <div className="space-y-8">
-            <div className="flex items-center space-x-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-teal-600 rounded-3xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-300">
-                <CrownOutlined className="text-white text-3xl" />
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-300 p-2">
+                <img src="/cmt.png" alt="CMT Logo" className="w-full h-full object-contain" />
               </div>
               <div>
-                <Title level={1} className="!text-3xl !font-bold !text-gray-800 !mb-3 !leading-tight">
-                  CRM Pro
+                <Title level={1} className="!text-2xl !font-bold !text-gray-800 !mb-2 !leading-tight">
+                  CMT Expertise
                 </Title>
                 <div className="flex items-center">
-                  <Text className="text-xl text-gray-600 font-medium">
+                  <Text className="text-lg text-gray-600 font-medium">
                     Solution de gestion d'entreprise nouvelle génération
                   </Text>
-                  <span className="ml-3 px-3 py-1 bg-teal-100 text-teal-800 text-xs font-bold rounded-full">
-                    Version 1.0
+                  <span className="ml-3 px-2 py-0.5 bg-teal-100 text-teal-800 text-xs font-bold rounded-full">
+                    v1.0
                   </span>
                 </div>
               </div>
             </div>
             
-            <Paragraph className="text-1xl text-gray-700 leading-relaxed font-light max-w-2xl">
+            <Paragraph className="text-lg text-gray-700 leading-relaxed font-light max-w-xl">
               Transformez votre façon de gérer votre entreprise avec une solution complète, 
               intuitive et puissante. Factures, clients, paiements et bien plus encore.
             </Paragraph>
           </div>
 
           {/* Enhanced Features grid */}
-          <div className="grid grid-cols-1 gap-3 max-w-1xl">
+          <div className="grid grid-cols-1 gap-3 max-w-lg">
             {features.map((feature, index) => (
               <div 
                 key={index}
-                className="flex items-center space-x-6 p-6 bg-white/100 backdrop-blur-md rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
+                className="flex items-center space-x-4 p-4 bg-white/100 backdrop-blur-md rounded-xl border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
                   {feature.icon}
                 </div>
                 <div>
-                  <Text strong className="text-gray-800 text-xl block mb-1">
+                  <Text strong className="text-gray-800 text-lg block mb-0.5">
                     {feature.title}
                   </Text>
-                  <Text className="text-gray-600 text-base">
+                  <Text className="text-gray-600 text-sm">
                     {feature.description}
                   </Text>
                 </div>
@@ -210,27 +200,27 @@ const LoginPage: React.FC = () => {
           </div>
 
           {/* Enhanced Stats section */}
-          <div className="grid grid-cols-3 gap-3 pt-8 max-w-2xl">
-            <div className="text-center p-4 bg-white/50 backdrop-blur-sm rounded-2xl hover:bg-white/70 transition-colors duration-300 shadow-md hover:shadow-lg">
-              <div className="text-4xl font-bold text-teal-600 mb-2 relative inline-block">
+          <div className="grid grid-cols-3 gap-3 pt-4 max-w-lg">
+            <div className="text-center p-3 bg-white/50 backdrop-blur-sm rounded-xl hover:bg-white/70 transition-colors duration-300 shadow-md hover:shadow-lg">
+              <div className="text-3xl font-bold text-teal-600 mb-1 relative inline-block">
                 <span className="relative z-10">500+</span>
                 <span className="absolute -inset-1 bg-teal-100 rounded-lg -z-0 opacity-30"></span>
               </div>
-              <div className="text-gray-600 font-medium">Entreprises</div>
+              <div className="text-gray-600 font-medium text-sm">Entreprises</div>
             </div>
-            <div className="text-center p-4 bg-white/50 backdrop-blur-sm rounded-2xl hover:bg-white/70 transition-colors duration-300 shadow-md hover:shadow-lg">
-              <div className="text-4xl font-bold text-blue-600 mb-2 relative inline-block">
+            <div className="text-center p-3 bg-white/50 backdrop-blur-sm rounded-xl hover:bg-white/70 transition-colors duration-300 shadow-md hover:shadow-lg">
+              <div className="text-3xl font-bold text-blue-600 mb-1 relative inline-block">
                 <span className="relative z-10">99.9%</span>
                 <span className="absolute -inset-1 bg-blue-100 rounded-lg -z-0 opacity-30"></span>
               </div>
-              <div className="text-gray-600 font-medium">Disponibilité</div>
+              <div className="text-gray-600 font-medium text-sm">Disponibilité</div>
             </div>
-            <div className="text-center p-4 bg-white/50 backdrop-blur-sm rounded-2xl hover:bg-white/70 transition-colors duration-300 shadow-md hover:shadow-lg">
-              <div className="text-4xl font-bold text-purple-600 mb-2 relative inline-block">
+            <div className="text-center p-3 bg-white/50 backdrop-blur-sm rounded-xl hover:bg-white/70 transition-colors duration-300 shadow-md hover:shadow-lg">
+              <div className="text-3xl font-bold text-purple-600 mb-1 relative inline-block">
                 <span className="relative z-10">24/7</span>
                 <span className="absolute -inset-1 bg-purple-100 rounded-lg -z-0 opacity-30"></span>
               </div>
-              <div className="text-gray-600 font-medium">Support client</div>
+              <div className="text-gray-600 font-medium text-sm">Support client</div>
             </div>
           </div>
         </div>
@@ -245,7 +235,7 @@ const LoginPage: React.FC = () => {
               <div className="text-center mb-8">
                 <Title level={2} className="!text-gray-800 !mb-3">Connexion</Title>
                 <Text className="text-gray-500">
-                  Accédez à votre tableau de bord CRM Pro
+                  Accédez à votre tableau de bord CMT Expertise
                 </Text>
               </div>
 

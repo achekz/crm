@@ -160,7 +160,7 @@ export const sendCalendarEventViaEmail = (eventData: {
 export const checkGoogleLoginStatus = async (): Promise<boolean> => {
   try {
     // Try to access Google Calendar to check login status
-    const response = await fetch('https://calendar.google.com/calendar/u/0/r', {
+    await fetch('https://calendar.google.com/calendar/u/0/r', {
       method: 'HEAD',
       mode: 'no-cors'
     });

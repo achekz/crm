@@ -34,8 +34,8 @@ export const useSocket = () => {
       console.log("Initializing socket connection...");
       socketService.connect(token);
 
-      // Set up event listeners
-      socketService.onNewMessage((message: Message) => {
+      // Register listeners
+      const onNewMessageHandler = (message: Message) => {
         console.log("🔔 New message received:", message);
         console.log(
           "📍 Current active conversation:",
@@ -44,16 +44,12 @@ export const useSocket = () => {
         console.log("🎯 Message conversation:", message.conversationId);
 
         // Only refresh conversations for conversation list updates
-        // Reduced delay since components handle their own updates now
         setTimeout(() => {
           dispatch(fetchConversations());
         }, 100);
 
         // Show notification if not in active conversation
         if (message.conversationId !== activeConversationRef.current) {
-          console.log(
-            "📬 Showing notification for message not in active conversation"
-          );
           notification.info({
             message: `Nouveau message de ${message.senderId.name}`,
             description: message.content.substring(0, 100),
@@ -61,14 +57,10 @@ export const useSocket = () => {
             duration: 4,
           });
           dispatch(incrementUnreadCount());
-        } else {
-          console.log(
-            "✅ Message is for current active conversation - no notification needed"
-          );
         }
-      });
+      };
 
-      socketService.onNewMessageNotification((notif: MessageNotification) => {
+      const onNewMessageNotificationHandler = (notif: MessageNotification) => {
         console.log("Message notification:", notif);
 
         // Show system notification
@@ -80,67 +72,64 @@ export const useSocket = () => {
         });
 
         dispatch(incrementUnreadCount());
-      });
+        dispatch(fetchConversations());
+      };
 
-      socketService.onMessageSent(
-        (data: { tempId?: string; message: Message }) => {
-          console.log("✅ Message sent confirmation:", data);
-          console.log(
-            "🔄 Not adding to Redux - let components handle their own state"
-          );
-          // Don't add to Redux - let components handle real-time updates
-        }
-      );
+      const onMessageSentHandler = (data: {
+        tempId?: string;
+        message: Message;
+      }) => {
+        console.log("✅ Message sent confirmation:", data);
+        console.log(
+          "🔄 Not adding to Redux - let components handle their own state"
+        );
+        // Don't add to Redux - let components handle real-time updates
+      };
 
-      socketService.onMessageError((error: { error: string }) => {
+      const onMessageErrorHandler = (error: { error: string }) => {
         console.error("Message error:", error);
         notification.error({
           message: "Erreur",
           description: error.error,
           placement: "topRight",
         });
-      });
+      };
 
-      socketService.onMessageReadReceipt((data) => {
-        console.log("Message read receipt:", data);
-        // Update message status in UI if needed
-      });
-
-      socketService.onMessageMarkedRead((data) => {
-        console.log("Messages marked as read:", data);
-        // Handle read confirmation
-      });
-
-      socketService.onUserOnline((user) => {
+      const onUserOnlineHandler = (user: any) => {
         console.log("User came online:", user);
         dispatch(addOnlineUser(user.userId));
-      });
+      };
 
-      socketService.onUserOffline((user) => {
+      const onUserOfflineHandler = (user: any) => {
         console.log("User went offline:", user);
         dispatch(removeOnlineUser(user.userId));
-      });
+      };
 
-      socketService.onOnlineUsersList((users) => {
+      const onOnlineUsersListHandler = (users: any) => {
         console.log("Online users list:", users);
         dispatch(setOnlineUsers(users));
-      });
+      };
 
-      // Listen for invoice notifications
-      socketService.onInvoiceNotification((invoiceNotification) => {
+      const onInvoiceNotificationHandler = (invoiceNotification: any) => {
         console.log("📥 Invoice notification received:", invoiceNotification);
-        
-        // Dispatch to Redux store
         dispatch(addInvoiceNotification(invoiceNotification));
-        
-        // Show notification UI
         notification.info({
           message: invoiceNotification.title,
           description: invoiceNotification.message,
           placement: "topRight",
           duration: 6,
         });
-      });
+      };
+
+      // Attach listeners
+      socketService.onNewMessage(onNewMessageHandler);
+      socketService.onNewMessageNotification(onNewMessageNotificationHandler);
+      socketService.onMessageSent(onMessageSentHandler);
+      socketService.onMessageError(onMessageErrorHandler);
+      socketService.onUserOnline(onUserOnlineHandler);
+      socketService.onUserOffline(onUserOfflineHandler);
+      socketService.onOnlineUsersList(onOnlineUsersListHandler);
+      socketService.onInvoiceNotification(onInvoiceNotificationHandler);
 
       // Get initial online users list
       socketService.getOnlineUsers();
@@ -149,7 +138,16 @@ export const useSocket = () => {
       dispatch(fetchConversations());
 
       return () => {
-        console.log("Cleaning up socket connection...");
+        console.log("Cleaning up socket listeners...");
+        socketService.off("message:new", onNewMessageHandler);
+        socketService.off("notification:new-message", onNewMessageNotificationHandler);
+        socketService.off("message:sent", onMessageSentHandler);
+        socketService.off("message:error", onMessageErrorHandler);
+        socketService.off("user:online", onUserOnlineHandler);
+        socketService.off("user:offline", onUserOfflineHandler);
+        socketService.off("users:online-list", onOnlineUsersListHandler);
+        socketService.off("notification:invoice", onInvoiceNotificationHandler);
+
         socketService.disconnect();
       };
     }
