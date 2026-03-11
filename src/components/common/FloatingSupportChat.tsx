@@ -9,7 +9,6 @@ import {
   MailOutlined,
   QuestionCircleOutlined,
   RobotOutlined,
-  UserOutlined,
   MinusOutlined,
 } from '@ant-design/icons';
 import { useSelector, useDispatch } from 'react-redux';
@@ -447,7 +446,10 @@ const FloatingSupportChat: React.FC = () => {
                     <>
                       {conversationMessages.map((message) => {
                         const isCurrentUser = message.senderId.id === user?.id;
-                        const formattedDate = formatMessageDate(message.timestamp);
+                        const formattedDate = formatMessageDate(message.timestamp || message.createdAt || new Date().toISOString());
+                        const senderName = typeof message.senderId === 'object' && message.senderId?.name 
+                          ? message.senderId.name 
+                          : 'Support';
                         
                         return (
                           <div
@@ -457,8 +459,20 @@ const FloatingSupportChat: React.FC = () => {
                               display: 'flex',
                               flexDirection: 'column',
                               alignItems: isCurrentUser ? 'flex-end' : 'flex-start',
+                              width: '100%'
                             }}
                           >
+                            {!isCurrentUser && (
+                              <div style={{ 
+                                fontSize: '11px', 
+                                fontWeight: 500, 
+                                color: '#64748b',
+                                marginBottom: '4px',
+                                marginLeft: '8px'
+                              }}>
+                                {senderName}
+                              </div>
+                            )}
                             <div 
                               style={{
                                 maxWidth: '85%',
@@ -479,22 +493,6 @@ const FloatingSupportChat: React.FC = () => {
                               }}
                               className="hover:shadow-lg"
                             >
-                              {!isCurrentUser && (
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <Avatar 
-                                    size={24} 
-                                    src={message.senderId.avatar} 
-                                    icon={<UserOutlined />}
-                                    style={{
-                                      border: '2px solid white',
-                                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                    }}
-                                  />
-                                  <Text style={{ fontSize: '12px', fontWeight: 500, color: '#64748b' }}>
-                                    {message.senderId.name}
-                                  </Text>
-                                </div>
-                              )}
                               <div 
                                 style={{ 
                                   fontSize: '15px', 
@@ -517,7 +515,7 @@ const FloatingSupportChat: React.FC = () => {
                                   gap: '4px'
                                 }}
                               >
-                                {formattedDate.time}
+                                {formattedDate.time || '00:00'}
                                 {isCurrentUser && (
                                   <span style={{ marginLeft: '4px', color: message.read ? '#34d399' : 'inherit' }}>
                                     {message.read ? '✓✓' : '✓'}

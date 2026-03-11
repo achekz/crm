@@ -30,7 +30,6 @@ import {
   MenuUnfoldOutlined,
   CalendarOutlined,
   DollarOutlined,
-  MessageOutlined,
   CrownOutlined,
   EditOutlined,
   QuestionCircleOutlined,
@@ -46,7 +45,6 @@ import FloatingSupportChat from "../common/FloatingSupportChat";
 const ClientDashboard = lazy(() => import("../pages/client/ClientDashboard"));
 const ClientInvoicesPage = lazy(() => import("../pages/client/ClientInvoicesPage"));
 const ClientPaymentsPage = lazy(() => import("../pages/client/ClientPaymentsPage"));
-const ClientMessagesPage = lazy(() => import("../pages/client/ClientMessagesPage"));
 const ClientAppointmentsPage = lazy(() => import("../pages/client/ClientAppointmentsPage"));
 const ClientDocumentsPage = lazy(() => import("../pages/client/ClientDocumentsPage"));
 
@@ -273,11 +271,6 @@ const ClientLayout: React.FC = () => {
       label: "Rendez-vous",
     },
     {
-      key: "messages",
-      icon: <MessageOutlined />,
-      label: "Messages",
-    },
-    {
       key: "documents",
       icon: <FolderOutlined />,
       label: "Documents",
@@ -454,7 +447,6 @@ const ClientLayout: React.FC = () => {
                 <Route path="dashboard" element={<ClientDashboard />} />
                 <Route path="invoices" element={<ClientInvoicesPage />} />
                 <Route path="payments" element={<ClientPaymentsPage />} />
-                <Route path="messages" element={<ClientMessagesPage />} />
                 <Route path="appointments" element={<ClientAppointmentsPage />} />
                 <Route path="documents" element={<ClientDocumentsPage />} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />

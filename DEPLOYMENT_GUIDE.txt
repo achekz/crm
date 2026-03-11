@@ -1,0 +1,285 @@
+# 🚀 CRM Deployment Guide with SSL/HTTPS
+
+## Quick Start
+
+### 1️⃣ Deploy Latest Changes to Production
+
+```bash
+chmod +x quick-deploy-ssh.sh
+./quick-deploy-ssh.sh
+```
+
+This will:
+- ✅ Clone/pull latest code from git
+- ✅ Install backend dependencies
+- ✅ Install frontend dependencies
+- ✅ Build frontend (Vite)
+- ✅ Restart PM2 with latest code
+- ✅ Show deployment status
+
+### 2️⃣ Configure SSL/HTTPS
+
+First, point your domain to the server IP (31.97.38.243) via DNS.
+
+Then run:
+```bash
+chmod +x ssl-setup.sh
+./ssl-setup.sh yourdomain.com
+```
+
+This will:
+- ✅ Install Certbot
+- ✅ Request SSL certificate from Let's Encrypt
+- ✅ Configure Nginx with HTTPS
+- ✅ Enable automatic certificate renewal
+- ✅ Redirect HTTP to HTTPS
+
+### 3️⃣ Verify Deployment
+
+```bash
+# Check PM2 status
+ssh root@31.97.38.243 'pm2 status'
+
+# View logs
+ssh root@31.97.38.243 'pm2 logs crm-backend'
+
+# Check Nginx
+ssh root@31.97.38.243 'systemctl status nginx'
+
+# Verify SSL
+ssh root@31.97.38.243 'certbot certificates'
+```
+
+---
+
+## Manual Steps (if needed)
+
+### Initialize Git Repository on Server
+
+```bash
+ssh root@31.97.38.243
+cd /var/www/crm
+
+# If not already a git repo
+git init
+git remote add origin https://github.com/achekz/crm.git
+git fetch origin main
+git checkout -f origin/main
+```
+
+### Install Dependencies
+
+```bash
+# Backend
+cd /var/www/crm/backend
+npm install
+
+# Frontend
+cd /var/www/crm
+npm install
+```
+
+### Build Frontend
+
+```bash
+cd /var/www/crm
+npm run build
+```
+
+### Start with PM2
+
+```bash
+cd /var/www/crm/backend
+pm2 start ecosystem.config.js
+pm2 save
+```
+
+### Configure Environment Variables
+
+```bash
+# Backend .env
+cat > /var/www/crm/backend/.env << 'EOF'
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/crm
+JWT_SECRET=your-secret-key-here
+PORT=5000
+NODE_ENV=production
+FRONTEND_URL=https://yourdomain.com
+CORS_ORIGIN=https://yourdomain.com
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_PUBLISHABLE_KEY=pk_live_...
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+EOF
+```
+
+### Configure Nginx
+
+Create `/etc/nginx/sites-available/crm`:
+
+```nginx
+upstream backend {
+    server localhost:5000;
+}
+
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+    
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+    
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com www.yourdomain.com;
+    
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+    
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    
+    root /var/www/crm/dist;
+    index index.html;
+    
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    
+    location /api {
+        proxy_pass http://backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    location /socket.io {
+        proxy_pass http://backend;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+    }
+}
+```
+
+Enable and test:
+```bash
+ln -sf /etc/nginx/sites-available/crm /etc/nginx/sites-enabled/crm
+nginx -t
+systemctl reload nginx
+```
+
+### Request SSL Certificate
+
+```bash
+certbot certonly --standalone \
+  --agree-tos \
+  -m admin@yourdomain.com \
+  -d yourdomain.com \
+  -d www.yourdomain.com
+```
+
+---
+
+## Common Commands
+
+| Task | Command |
+|------|---------|
+| **Deploy updates** | `./quick-deploy-ssh.sh` |
+| **Setup SSL** | `./ssl-setup.sh yourdomain.com` |
+| **View logs** | `ssh root@31.97.38.243 'pm2 logs crm-backend'` |
+| **Restart app** | `ssh root@31.97.38.243 'pm2 restart crm-backend'` |
+| **Stop app** | `ssh root@31.97.38.243 'pm2 stop crm-backend'` |
+| **Check status** | `ssh root@31.97.38.243 'pm2 status'` |
+| **Nginx status** | `ssh root@31.97.38.243 'systemctl status nginx'` |
+| **Check SSL** | `ssh root@31.97.38.243 'certbot certificates'` |
+| **Renew SSL** | `ssh root@31.97.38.243 'certbot renew'` |
+
+---
+
+## Troubleshooting
+
+### App not running after deploy?
+```bash
+ssh root@31.97.38.243
+cd /var/www/crm/backend
+pm2 logs crm-backend
+```
+
+### Nginx not loading?
+```bash
+ssh root@31.97.38.243
+nginx -t
+systemctl status nginx
+tail -f /var/log/nginx/error.log
+```
+
+### SSL certificate issues?
+```bash
+ssh root@31.97.38.243
+certbot certificates
+certbot renew --dry-run  # Test renewal
+```
+
+### Git authentication issues?
+Use SSH key or HTTPS token:
+```bash
+git remote set-url origin https://username:token@github.com/achekz/crm.git
+```
+
+---
+
+## Architecture Overview
+
+```
+User's Browser (HTTPS)
+        ↓
+Nginx (SSL/TLS)
+        ↓
+Frontend (Vite)     Backend (PM2)
+  dist/             Node.js:5000
+  index.html          ↓
+  assets/          Express.js
+                      ↓
+                  MongoDB
+```
+
+---
+
+## Security Checklist
+
+- ✅ HTTPS enabled (SSL/TLS)
+- ✅ HTTP redirects to HTTPS
+- ✅ HSTS header configured
+- ✅ Security headers added
+- ✅ Environment variables secured
+- ✅ Database credentials in .env (not in git)
+- ✅ Firewall rules configured
+- ✅ Regular backups enabled
+
+---
+
+## Next Steps
+
+1. Update DNS records to point domain to 31.97.38.243
+2. Wait for DNS propagation
+3. Run `./ssl-setup.sh yourdomain.com`
+4. Update frontend env vars (VITE_BACKEND_URL)
+5. Deploy: `./quick-deploy-ssh.sh`
+6. Test at https://yourdomain.com
+
+For questions, check logs or run deployment script!

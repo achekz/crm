@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Card,
   List,
@@ -439,11 +439,11 @@ const MessagesPage: React.FC = () => {
         : `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}${message.fileUrl}`;
       
       return (
-        <div className="message-image-container">
+        <div style={{ marginBottom: "8px" }}>
           <Image
             src={imageUrl}
             alt="Image partagée"
-            style={{ maxWidth: "200px", borderRadius: "8px" }}
+            style={{ maxWidth: "200px", maxHeight: "300px", borderRadius: "8px" }}
           />
         </div>
       );
@@ -453,18 +453,26 @@ const MessagesPage: React.FC = () => {
         : `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}${message.fileUrl}`;
         
       return (
-        <div className="message-file-container">
+        <div style={{ marginBottom: "8px" }}>
           <a 
             href={fileUrl} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
-            style={{ textDecoration: 'none', color: 'inherit' }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px",
+              backgroundColor: "rgba(0, 0, 0, 0.05)",
+              borderRadius: "8px",
+              textDecoration: "none",
+              color: "inherit"
+            }}
           >
-            <FileOutlined style={{ fontSize: '24px' }} />
+            <FileOutlined style={{ fontSize: "20px" }} />
             <div>
               <div style={{ fontWeight: 500 }}>{message.fileName || "Fichier joint"}</div>
-              <div style={{ fontSize: '11px', color: '#666' }}>Cliquez pour télécharger</div>
+              <div style={{ fontSize: "11px", color: "#666" }}>Cliquez pour télécharger</div>
             </div>
             <DownloadOutlined />
           </a>
@@ -472,7 +480,7 @@ const MessagesPage: React.FC = () => {
       );
     }
     
-    return <div className="message-text">{message.content}</div>;
+    return <span>{message.content}</span>;
   };
 
   return (
@@ -683,30 +691,60 @@ const MessagesPage: React.FC = () => {
                   </div>
                 ) : (
                   <>
-                    {getConversationMessages().map((message: Message) => (
-                      <div
-                        key={message.id}
-                        className={`message ${
-                          message.senderId.id === user?.id
-                            ? "my-message"
-                            : "other-message"
-                        }`}
-                      >
-                        <div className="message-content">
-                          {renderMessageContent(message)}
-                          <div className="message-meta">
-                            <span className="message-time">
-                              {formatMessageTime(getMessageDate(message))}
-                            </span>
-                            {message.senderId.id === user?.id && (
-                                <span className="message-status">
+                    {getConversationMessages().map((message: Message) => {
+                      const isCurrentUser = message.senderId.id === user?.id;
+                      return (
+                        <div
+                          key={message.id}
+                          style={{
+                            marginBottom: "16px",
+                            display: "flex",
+                            justifyContent: isCurrentUser ? "flex-end" : "flex-start",
+                            width: "100%"
+                          }}
+                        >
+                          <div
+                            style={{
+                              maxWidth: "70%",
+                              backgroundColor: isCurrentUser ? "#1890ff" : "#ffffff",
+                              color: isCurrentUser ? "#ffffff" : "#333333",
+                              padding: "12px 16px",
+                              borderRadius: "12px",
+                              borderBottomLeftRadius: isCurrentUser ? "12px" : "4px",
+                              borderBottomRightRadius: isCurrentUser ? "4px" : "12px",
+                              border: isCurrentUser ? "none" : "1px solid #e8e8e8",
+                              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                              position: "relative",
+                              wordWrap: "break-word",
+                              whiteSpace: "pre-wrap",
+                              lineHeight: "1.4"
+                            }}
+                          >
+                            {renderMessageContent(message)}
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginTop: "6px",
+                                fontSize: "11px",
+                                opacity: 0.8,
+                                gap: "4px"
+                              }}
+                            >
+                              <span>
+                                {formatMessageTime(getMessageDate(message))}
+                              </span>
+                              {isCurrentUser && (
+                                <span style={{ color: message.read ? "#52c41a" : "inherit" }}>
                                   {message.read ? "✓✓" : "✓"}
                                 </span>
                               )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
 
                     <div ref={messagesEndRef} />
                   </>
