@@ -463,15 +463,31 @@ const FloatingSupportChat: React.FC = () => {
                   ) : (
                     <>
                       {conversationMessages.map((message) => {
-                        const senderIdStr = (
-                          typeof message.senderId === 'object'
-                            ? ((message.senderId as any).id || (message.senderId as any)._id || '')
-                            : String(message.senderId)
-                        ).trim();
+                        // Extract senderId safely — handle both populated objects and string IDs
+                        let senderIdStr = '';
+                        if (typeof message.senderId === 'object' && message.senderId) {
+                          // Populated sender object: prefer .id, fallback to ._id
+                          senderIdStr = ((message.senderId as any).id || (message.senderId as any)._id || '');
+                        } else if (typeof message.senderId === 'string') {
+                          senderIdStr = message.senderId;
+                        }
+                        senderIdStr = String(senderIdStr).trim();
+
+                        // Get current user ID safely
                         const safeCurrentUserId = (currentUserId || '').trim();
-                        const isCurrentUser = !!(safeCurrentUserId && senderIdStr && senderIdStr === safeCurrentUserId);
-                        // DEBUG LOG — remove after fix confirmed
-                        console.log('[FloatChat bubble] senderIdStr:', senderIdStr, '| currentUserId:', safeCurrentUserId, '| isCurrentUser:', isCurrentUser);
+
+                        // Normalize both for comparison (handle MongoDB ObjectId string formats)
+                        const senderIdNorm = senderIdStr.toLowerCase();
+                        const userIdNorm = safeCurrentUserId.toLowerCase();
+                        const isCurrentUser = !!(safeCurrentUserId && senderIdStr && senderIdNorm === userIdNorm);
+
+                        // DEBUG LOGS
+                        if (conversationMessages.length > 0 && conversationMessages.indexOf(message) === 0) {
+                          console.log('[FloatChat] User ID from auth:', currentUserId);
+                          console.log('[FloatChat] First message senderId object:', JSON.stringify(message.senderId));
+                        }
+                        console.log(`[FloatChat bubble] msg: "${message.content.substring(0, 20)}..." | senderIdStr: "${senderIdStr}" | currentUserId: "${safeCurrentUserId}" | isCurrentUser: ${isCurrentUser}`);
+
                         const formattedDate = formatMessageDate(message.timestamp || (message as any).createdAt || new Date().toISOString());
                         const senderName = typeof message.senderId === 'object' && message.senderId?.name 
                           ? message.senderId.name 
