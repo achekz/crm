@@ -179,11 +179,21 @@ const FloatingSupportChat: React.FC = () => {
     const handleNewMessage = (message: Message) => {
       // Accept messages from ANY conversation with an admin (not just the specific conversation ID)
       // This handles the case of multiple admin accounts messaging the same client
-      const messageIsWithAdmin = 
-        (typeof message.senderId === 'object' && (message.senderId as any).role === 'admin') ||
-        (typeof message.receiverId === 'object' && (message.receiverId as any).role === 'admin');
+      const senderIsAdmin = 
+        (typeof message.senderId === 'object' && (message.senderId as any)?.role === 'admin');
       
-      if (!messageIsWithAdmin) return;
+      const receiverIsAdmin = 
+        (typeof message.receiverId === 'object' && (message.receiverId as any)?.role === 'admin');
+      
+      const messageIsWithAdmin = senderIsAdmin || receiverIsAdmin;
+      
+      // DEBUG: Log the check to understand why messages aren't being received
+      console.log('[FloatChat receive] senderIsAdmin:', senderIsAdmin, '| receiverIsAdmin:', receiverIsAdmin, '| senderIdObj:', JSON.stringify(message.senderId).substring(0, 100));
+      
+      if (!messageIsWithAdmin) {
+        console.log('[FloatChat] IGNORING message - not from/to admin');
+        return;
+      }
 
       setConversationMessages(prev => {
         if (isDuplicateMessage(message, prev)) return prev;
