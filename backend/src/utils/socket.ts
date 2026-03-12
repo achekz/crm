@@ -178,22 +178,7 @@ export const initializeSocket = (httpServer: HttpServer) => {
             { path: "receiverId", select: "name email avatar role" },
           ]);
 
-          // Emit to conversation room (this includes both sender and receiver if they're in the room)
-          io.to(conversationId).emit("message:new", {
-            ...message.toObject(),
-            conversationId,
-            tempId: data.tempId, // Pass tempId back so sender can de-duplicate
-          });
-
-          // Also emit specifically to sender's socket to ensure they get the update
-          // (Redundant if sender is in room, but good for reliability)
-          socket.emit("message:new", {
-            ...message.toObject(),
-            conversationId,
-            tempId: data.tempId,
-          });
-
-          // Ensure receiver is in the conversation room
+          // Ensure receiver is in the conversation room BEFORE emitting
           const receiverSocketId = activeUsers.get(receiverId);
           if (receiverSocketId) {
             const receiverSocket = io.sockets.sockets.get(receiverSocketId);
@@ -206,7 +191,22 @@ export const initializeSocket = (httpServer: HttpServer) => {
             }
           }
 
-          // Emit to receiver's personal room for notifications
+          // Emit to conversation room (includes both sender and receiver if they're in the room)
+          io.to(conversationId).emit("message:new", {
+            ...message.toObject(),
+            conversationId,
+            tempId: data.tempId,
+          });
+
+          // Also emit directly to receiver's personal room to guarantee delivery
+          // even if receiver hasn't explicitly joined the conversation room
+          io.to(receiverId).emit("message:new", {
+            ...message.toObject(),
+            conversationId,
+            tempId: data.tempId,
+          });
+
+          // Emit to receiver's personal room for notification badge
           io.to(receiverId).emit("notification:new-message", {
             senderId: socket.user.id,
             senderName: socket.user.name,
@@ -214,9 +214,9 @@ export const initializeSocket = (httpServer: HttpServer) => {
             conversationId,
           });
 
-          // Send confirmation to sender
+          // Send confirmation to sender only (not broadcast)
           socket.emit("message:sent", {
-            tempId: data.tempId, // For client-side message matching
+            tempId: data.tempId,
             message: {
               ...message.toObject(),
               conversationId,

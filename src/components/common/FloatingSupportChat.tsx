@@ -139,10 +139,26 @@ const FloatingSupportChat: React.FC = () => {
     });
   }, [user?.id, availableUsers, dispatch]);
 
-  // Join conversation room whenever activeConversationId is set / socket reconnects
+  // Join conversation room — retry until socket is actually connected
   useEffect(() => {
-    if (activeConversationId && isConnected()) {
+    if (!activeConversationId) return;
+
+    // Try immediately
+    if (isConnected()) {
       joinConversation(activeConversationId);
+    }
+
+    // Also join when the socket connects (handles the race condition where
+    // socket wasn't ready yet when activeConversationId was first set)
+    const socket = socketService.getSocket();
+    if (socket) {
+      const onConnect = () => {
+        if (activeConvIdRef.current) {
+          joinConversation(activeConvIdRef.current);
+        }
+      };
+      socket.on('connect', onConnect);
+      return () => { socket.off('connect', onConnect); };
     }
   }, [activeConversationId, isConnected, joinConversation]);
 
@@ -173,8 +189,8 @@ const FloatingSupportChat: React.FC = () => {
           !m.tempId || !message.tempId || m.tempId !== message.tempId
         );
         return [...filtered, message].sort(
-          (a, b) => new Date(a.timestamp || a.createdAt || 0).getTime() -
-                    new Date(b.timestamp || b.createdAt || 0).getTime()
+          (a, b) => new Date((a as any).timestamp || (a as any).createdAt || 0).getTime() -
+                    new Date((b as any).timestamp || (b as any).createdAt || 0).getTime()
         );
       });
     };
@@ -185,22 +201,23 @@ const FloatingSupportChat: React.FC = () => {
         const filtered = prev.filter(m => !tempId || m.tempId !== tempId);
         if (isDuplicateMessage(message, filtered)) return prev;
         return [...filtered, message].sort(
-          (a, b) => new Date(a.timestamp || a.createdAt || 0).getTime() -
-                    new Date(b.timestamp || b.createdAt || 0).getTime()
+          (a, b) => new Date((a as any).timestamp || (a as any).createdAt || 0).getTime() -
+                    new Date((b as any).timestamp || (b as any).createdAt || 0).getTime()
         );
       });
     };
 
-    // Remove old listeners first to prevent duplicates
-    socketService.off('message:new');
-    socketService.off('message:sent');
+    // Use named handlers with off(event, handler) to avoid removing other components' listeners
+    socketService.off('message:new', handleNewMessage);
+    socketService.off('message:sent', handleMessageSent);
 
     socketService.onNewMessage(handleNewMessage);
     socketService.onMessageSent(handleMessageSent);
 
     return () => {
-      socketService.off('message:new');
-      socketService.off('message:sent');
+      // Remove only THIS component's handlers — not all listeners on these events
+      socketService.off('message:new', handleNewMessage);
+      socketService.off('message:sent', handleMessageSent);
     };
   }, [user?.id, activeConversationId]);
 
