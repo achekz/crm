@@ -87,7 +87,11 @@ const formatMessageDate = (dateString: string): { time: string; date: string } =
 const FloatingSupportChat: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { unreadCount, availableUsers } = useSelector((state: RootState) => state.messages);
-  const { user } = useSelector((state: RootState) => state.auth);
+  // Always read user from both Redux AND localStorage so it's available immediately after refresh
+  const { user: reduxUser } = useSelector((state: RootState) => state.auth);
+  const user = reduxUser || (() => {
+    try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; }
+  })();
   const { sendMessage, isConnected, joinConversation } = useSocket();
   
   const [isOpen, setIsOpen] = useState(false);
@@ -96,117 +100,109 @@ const FloatingSupportChat: React.FC = () => {
   const [conversationMessages, setConversationMessages] = useState<Message[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const socketListenersInitialized = useRef(false);
+  // Store activeConversationId in a ref so socket handlers always have the current value
+  const activeConvIdRef = useRef<string | null>(null);
+  const currentUserId = user?.id;
 
-  // Fetch initial data when component mounts
+  // Keep ref in sync
+  useEffect(() => {
+    activeConvIdRef.current = activeConversationId;
+  }, [activeConversationId]);
+
+  // Fetch initial data when component mounts / user changes
   useEffect(() => {
     if (user) {
       dispatch(fetchConversations());
       dispatch(fetchAvailableUsers());
     }
-  }, [dispatch, user]);
+  }, [dispatch, user?.id]);
 
-  // Get or create conversation with support
+  // Get or create conversation with admin support
   useEffect(() => {
-    if (user && availableUsers.length > 0 && !activeConversationId) {
-      const adminUser = availableUsers.find(u => u.role === 'admin');
-      if (adminUser) {
-        const conversationId = generateConversationId(user.id, adminUser.id);
-        setActiveConversationId(conversationId);
-        
-        dispatch(fetchMessages(conversationId)).then((result) => {
-          if (result.payload && typeof result.payload === 'object' && 'messages' in result.payload) {
-            setConversationMessages((result.payload as { messages: Message[] }).messages || []);
-          }
-        });
-      }
-    }
-  }, [user, availableUsers, activeConversationId, dispatch]);
+    if (!user || availableUsers.length === 0) return;
 
-  // Join conversation room when active conversation changes
+    const adminUser = availableUsers.find(u => u.role === 'admin');
+    if (!adminUser) return;
+
+    const conversationId = generateConversationId(user.id, adminUser.id);
+
+    // Always (re)fetch messages when we have a conversation id — covers reload case
+    if (activeConversationId !== conversationId) {
+      setActiveConversationId(conversationId);
+    }
+
+    dispatch(fetchMessages(conversationId)).then((result) => {
+      const payload = result.payload as { conversationId: string; messages: Message[] } | undefined;
+      if (payload && Array.isArray(payload.messages)) {
+        setConversationMessages(payload.messages);
+      }
+    });
+  }, [user?.id, availableUsers, dispatch]);
+
+  // Join conversation room whenever activeConversationId is set / socket reconnects
   useEffect(() => {
     if (activeConversationId && isConnected()) {
       joinConversation(activeConversationId);
-      console.log(`Joined conversation: ${activeConversationId}`);
     }
-  }, [activeConversationId, joinConversation, isConnected]);
+  }, [activeConversationId, isConnected, joinConversation]);
 
-  // Helper function to check if two messages are duplicates
+  // Helper to check duplicates
   const isDuplicateMessage = (newMsg: Message, existingMessages: Message[]): boolean => {
     return existingMessages.some(
-      msg => 
-        (msg.id === newMsg.id) || // Same server-generated ID
-        (newMsg.tempId && msg.tempId === newMsg.tempId) || // Same temp ID
-        (msg.content === newMsg.content && // Same content and similar timestamp (within 2 seconds)
-         Math.abs(new Date(msg.timestamp).getTime() - new Date(newMsg.timestamp).getTime()) < 2000)
+      msg =>
+        msg.id === newMsg.id ||
+        (newMsg.tempId && msg.tempId === newMsg.tempId) ||
+        (!!newMsg.id && !!msg.id && newMsg.id === msg.id)
     );
   };
 
-  // Listen for real-time messages
+  // Real-time socket listeners — re-register whenever user/conversation changes
   useEffect(() => {
-    if (!user || !activeConversationId) return;
-    
-    // Clean up previous listeners to prevent duplicates
-    const cleanupSocketListeners = () => {
-      socketService.off('message:new');
-      socketService.off('message:sent');
-      console.log('Cleaned up previous socket listeners');
-    };
-    
-    cleanupSocketListeners();
-    
+    if (!user) return;
+
     const handleNewMessage = (message: Message) => {
-      console.log('Received message:', message);
-      
+      // Only process messages that belong to our conversation
+      if (message.conversationId && activeConvIdRef.current &&
+          message.conversationId !== activeConvIdRef.current) return;
+
       setConversationMessages(prev => {
-        // Check if this message is already in our state
-        if (isDuplicateMessage(message, prev)) {
-          console.log('Duplicate message detected, ignoring:', message);
-          return prev;
-        }
-        
-        // Remove any optimistic message if this is the server confirmation
-        const filteredMessages = prev.filter(m => 
-          !m.tempId || (message.tempId && m.tempId !== message.tempId)
+        if (isDuplicateMessage(message, prev)) return prev;
+
+        // Replace optimistic temp message if this is its server confirmation
+        const filtered = prev.filter(m =>
+          !m.tempId || !message.tempId || m.tempId !== message.tempId
         );
-        
-        return [...filteredMessages, message].sort(
-          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        return [...filtered, message].sort(
+          (a, b) => new Date(a.timestamp || a.createdAt || 0).getTime() -
+                    new Date(b.timestamp || b.createdAt || 0).getTime()
         );
       });
-
-      if (!isOpen) {
-        notification.info({
-          message: `Nouveau message de ${message.senderId.name}`,
-          description: message.content.substring(0, 100),
-          placement: 'topRight',
-          duration: 4,
-        });
-      }
     };
 
-    // Set up event listeners if not already initialized
-    if (!socketListenersInitialized.current) {
-      socketListenersInitialized.current = true;
-      
-      socketService.onNewMessage(handleNewMessage);
-      
-      socketService.onMessageSent(({ message, tempId }) => {
-        console.log('Message sent confirmation:', message, tempId);
-        // Only process if we have a tempId match
-        if (tempId) {
-          handleNewMessage(message);
-        }
+    const handleMessageSent = ({ message, tempId }: { message: Message; tempId?: string }) => {
+      // Replace optimistic message with confirmed server message
+      setConversationMessages(prev => {
+        const filtered = prev.filter(m => !tempId || m.tempId !== tempId);
+        if (isDuplicateMessage(message, filtered)) return prev;
+        return [...filtered, message].sort(
+          (a, b) => new Date(a.timestamp || a.createdAt || 0).getTime() -
+                    new Date(b.timestamp || b.createdAt || 0).getTime()
+        );
       });
-      
-      console.log('Socket listeners initialized');
-    }
+    };
+
+    // Remove old listeners first to prevent duplicates
+    socketService.off('message:new');
+    socketService.off('message:sent');
+
+    socketService.onNewMessage(handleNewMessage);
+    socketService.onMessageSent(handleMessageSent);
 
     return () => {
-      cleanupSocketListeners();
-      socketListenersInitialized.current = false;
+      socketService.off('message:new');
+      socketService.off('message:sent');
     };
-  }, [user, activeConversationId, isOpen]);
+  }, [user?.id, activeConversationId]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -445,7 +441,10 @@ const FloatingSupportChat: React.FC = () => {
                   ) : (
                     <>
                       {conversationMessages.map((message) => {
-                        const isCurrentUser = message.senderId.id === user?.id;
+                        const senderIdStr = typeof message.senderId === 'object'
+                          ? ((message.senderId as any).id || (message.senderId as any)._id || '')
+                          : String(message.senderId);
+                        const isCurrentUser = !!(currentUserId && senderIdStr && senderIdStr === currentUserId);
                         const formattedDate = formatMessageDate(message.timestamp || message.createdAt || new Date().toISOString());
                         const senderName = typeof message.senderId === 'object' && message.senderId?.name 
                           ? message.senderId.name 
