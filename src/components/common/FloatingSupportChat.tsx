@@ -463,12 +463,15 @@ const FloatingSupportChat: React.FC = () => {
                   ) : (
                     <>
                       {conversationMessages.map((message) => {
-                        const senderIdStr = typeof message.senderId === 'object'
-                          ? ((message.senderId as any).id || (message.senderId as any)._id || '')
-                          : String(message.senderId);
-                        const isCurrentUser = !!(currentUserId && senderIdStr && senderIdStr === currentUserId);
+                        const senderIdStr = (
+                          typeof message.senderId === 'object'
+                            ? ((message.senderId as any).id || (message.senderId as any)._id || '')
+                            : String(message.senderId)
+                        ).trim();
+                        const safeCurrentUserId = (currentUserId || '').trim();
+                        const isCurrentUser = !!(safeCurrentUserId && senderIdStr && senderIdStr === safeCurrentUserId);
                         // DEBUG LOG — remove after fix confirmed
-                        console.log('[FloatChat bubble] senderIdStr:', senderIdStr, '| currentUserId:', currentUserId, '| isCurrentUser:', isCurrentUser);
+                        console.log('[FloatChat bubble] senderIdStr:', senderIdStr, '| currentUserId:', safeCurrentUserId, '| isCurrentUser:', isCurrentUser);
                         const formattedDate = formatMessageDate(message.timestamp || (message as any).createdAt || new Date().toISOString());
                         const senderName = typeof message.senderId === 'object' && message.senderId?.name 
                           ? message.senderId.name 
