@@ -16,7 +16,6 @@ class SocketService {
   connect(token: string): void {
     const socketUrl =
       import.meta.env.VITE_SOCKET_URL ||
-      import.meta.env.VITE_BACKEND_URL?.replace("/api", "") ||
       "http://localhost:5000";
 
     this.socket = io(socketUrl, {

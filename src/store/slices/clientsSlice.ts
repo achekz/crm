@@ -9,8 +9,6 @@ export const getApiBaseUrl = () => {
   return '/api';
 };
 
-const BACKEND_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-
 export interface Client {
   id: string;
   name: string;
@@ -67,7 +65,7 @@ export const fetchClients = createAsyncThunk(
         
         // If proxy fails, try direct connection
         try {
-          response = await axios.get(`${BACKEND_BASE}${API_URL}`, {
+          response = await axios.get(API_URL, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
