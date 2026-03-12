@@ -25,13 +25,28 @@ export const initializeSocket = (httpServer: HttpServer) => {
 
   const io = new Server(httpServer, {
     cors: {
-      // Allow any localhost origin in development
       origin: (origin, callback) => {
-        // Allow requests without an origin (e.g., server-to-server) or from localhost
-        if (!origin || origin.startsWith("http://localhost") || origin.startsWith("http://127.0.0.1")) {
-          callback(null, true);
-        } else if (process.env.NODE_ENV === "production" && origin === process.env.FRONTEND_URL) {
-          // In production, only allow the specified FRONTEND_URL
+        // Allow requests without an origin (e.g., mobile apps, server-to-server)
+        if (!origin) return callback(null, true);
+
+        // Always allow localhost in development
+        if (
+          origin.startsWith("http://localhost") ||
+          origin.startsWith("http://127.0.0.1")
+        ) {
+          return callback(null, true);
+        }
+
+        // In production, allow FRONTEND_URL and known domains
+        const allowedOrigins = [
+          process.env.FRONTEND_URL,
+          "https://cmtaudit.cloud",
+          "https://www.cmtaudit.cloud",
+          "https://cmtaudit.tn",
+          "https://www.cmtaudit.tn",
+        ].filter(Boolean);
+
+        if (allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
           callback(new Error("Not allowed by CORS"));
@@ -40,6 +55,7 @@ export const initializeSocket = (httpServer: HttpServer) => {
       credentials: true,
       methods: ["GET", "POST"],
     },
+    transports: ["websocket", "polling"],
   });
 
   // Authentication middleware

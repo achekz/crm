@@ -14,15 +14,18 @@ class SocketService {
   private socket: Socket | null = null;
 
   connect(token: string): void {
-    this.socket = io(
-      import.meta.env.VITE_BACKEND_URL || "http://localhost:5000",
-      {
-        auth: {
-          token,
-        },
-        autoConnect: true,
-      }
-    );
+    const socketUrl =
+      import.meta.env.VITE_SOCKET_URL ||
+      import.meta.env.VITE_BACKEND_URL?.replace("/api", "") ||
+      "http://localhost:5000";
+
+    this.socket = io(socketUrl, {
+      auth: {
+        token,
+      },
+      autoConnect: true,
+      transports: ["websocket", "polling"],
+    });
 
     this.socket.on("connect", () => {
       console.log("Connected to server");

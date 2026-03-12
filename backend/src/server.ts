@@ -45,6 +45,9 @@ databaseConnection.connect();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy - REQUIRED for rate limiting and correct IP behind Nginx
+app.set("trust proxy", 1);
+
 // Create HTTP server
 const server = http.createServer(app);
 
@@ -82,7 +85,11 @@ app.use(requestLogger);
 const allowedOrigins = [
   'http://localhost:5173', // Frontend development
   'http://localhost:3000', // Alternative frontend port
-  process.env.FRONTEND_URL // Production frontend URL
+  'https://cmtaudit.cloud',
+  'https://www.cmtaudit.cloud',
+  'https://cmtaudit.tn',
+  'https://www.cmtaudit.tn',
+  process.env.FRONTEND_URL // Production frontend URL from .env
 ].filter(Boolean);
 
 app.use(cors({
