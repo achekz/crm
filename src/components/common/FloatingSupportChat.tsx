@@ -134,11 +134,6 @@ const FloatingSupportChat: React.FC = () => {
     dispatch(fetchMessages(conversationId)).then((result) => {
       const payload = result.payload as { conversationId: string; messages: Message[] } | undefined;
       if (payload && Array.isArray(payload.messages)) {
-        // DEBUG: log first message shape to diagnose senderId.id issue
-        if (payload.messages.length > 0) {
-          const m = payload.messages[0];
-          console.log('[FloatChat] currentUserId:', user?.id, '| first msg senderId:', JSON.stringify(m.senderId));
-        }
         setConversationMessages(payload.messages);
       }
     });
@@ -182,9 +177,13 @@ const FloatingSupportChat: React.FC = () => {
     if (!user) return;
 
     const handleNewMessage = (message: Message) => {
-      // Only process messages that belong to our conversation
-      if (message.conversationId && activeConvIdRef.current &&
-          message.conversationId !== activeConvIdRef.current) return;
+      // Accept messages from ANY conversation with an admin (not just the specific conversation ID)
+      // This handles the case of multiple admin accounts messaging the same client
+      const messageIsWithAdmin = 
+        (typeof message.senderId === 'object' && (message.senderId as any).role === 'admin') ||
+        (typeof message.receiverId === 'object' && (message.receiverId as any).role === 'admin');
+      
+      if (!messageIsWithAdmin) return;
 
       setConversationMessages(prev => {
         if (isDuplicateMessage(message, prev)) return prev;
@@ -480,13 +479,6 @@ const FloatingSupportChat: React.FC = () => {
                         const senderIdNorm = senderIdStr.toLowerCase();
                         const userIdNorm = safeCurrentUserId.toLowerCase();
                         const isCurrentUser = !!(safeCurrentUserId && senderIdStr && senderIdNorm === userIdNorm);
-
-                        // DEBUG LOGS
-                        if (conversationMessages.length > 0 && conversationMessages.indexOf(message) === 0) {
-                          console.log('[FloatChat] User ID from auth:', currentUserId);
-                          console.log('[FloatChat] First message senderId object:', JSON.stringify(message.senderId));
-                        }
-                        console.log(`[FloatChat bubble] msg: "${message.content.substring(0, 20)}..." | senderIdStr: "${senderIdStr}" | currentUserId: "${safeCurrentUserId}" | isCurrentUser: ${isCurrentUser}`);
 
                         const formattedDate = formatMessageDate(message.timestamp || (message as any).createdAt || new Date().toISOString());
                         const senderName = typeof message.senderId === 'object' && message.senderId?.name 
