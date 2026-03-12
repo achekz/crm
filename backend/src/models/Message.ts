@@ -61,14 +61,16 @@ const messageSchema = new Schema<IMessage>(
     toJSON: {
       virtuals: true,
       transform: (_doc, ret) => {
-        // Ensure top-level id is always a string
         ret.id = ret._id?.toString();
-        // Normalize populated senderId
-        if (ret.senderId && typeof ret.senderId === 'object' && ret.senderId._id) {
+        // If senderId/receiverId were NOT populated (still ObjectIds), stringify them
+        if (ret.senderId && typeof ret.senderId !== 'object') {
+          ret.senderId = ret.senderId.toString();
+        } else if (ret.senderId && typeof ret.senderId === 'object' && !ret.senderId.id && ret.senderId._id) {
           ret.senderId.id = ret.senderId._id.toString();
         }
-        // Normalize populated receiverId
-        if (ret.receiverId && typeof ret.receiverId === 'object' && ret.receiverId._id) {
+        if (ret.receiverId && typeof ret.receiverId !== 'object') {
+          ret.receiverId = ret.receiverId.toString();
+        } else if (ret.receiverId && typeof ret.receiverId === 'object' && !ret.receiverId.id && ret.receiverId._id) {
           ret.receiverId.id = ret.receiverId._id.toString();
         }
         return ret;
@@ -78,10 +80,14 @@ const messageSchema = new Schema<IMessage>(
       virtuals: true,
       transform: (_doc, ret) => {
         ret.id = ret._id?.toString();
-        if (ret.senderId && typeof ret.senderId === 'object' && ret.senderId._id) {
+        if (ret.senderId && typeof ret.senderId !== 'object') {
+          ret.senderId = ret.senderId.toString();
+        } else if (ret.senderId && typeof ret.senderId === 'object' && !ret.senderId.id && ret.senderId._id) {
           ret.senderId.id = ret.senderId._id.toString();
         }
-        if (ret.receiverId && typeof ret.receiverId === 'object' && ret.receiverId._id) {
+        if (ret.receiverId && typeof ret.receiverId !== 'object') {
+          ret.receiverId = ret.receiverId.toString();
+        } else if (ret.receiverId && typeof ret.receiverId === 'object' && !ret.receiverId.id && ret.receiverId._id) {
           ret.receiverId.id = ret.receiverId._id.toString();
         }
         return ret;

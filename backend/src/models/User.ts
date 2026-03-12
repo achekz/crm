@@ -84,6 +84,23 @@ const userSchema = new Schema<IUser>(
   },
   {
     timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: (_doc, ret) => {
+        ret.id = ret._id?.toString();
+        delete ret.__v;
+        delete ret.password;
+        return ret;
+      },
+    },
+    toObject: {
+      virtuals: true,
+      transform: (_doc, ret) => {
+        ret.id = ret._id?.toString();
+        delete ret.__v;
+        return ret;
+      },
+    },
   }
 );
 

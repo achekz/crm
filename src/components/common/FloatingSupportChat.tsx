@@ -134,6 +134,11 @@ const FloatingSupportChat: React.FC = () => {
     dispatch(fetchMessages(conversationId)).then((result) => {
       const payload = result.payload as { conversationId: string; messages: Message[] } | undefined;
       if (payload && Array.isArray(payload.messages)) {
+        // DEBUG: log first message shape to diagnose senderId.id issue
+        if (payload.messages.length > 0) {
+          const m = payload.messages[0];
+          console.log('[FloatChat] currentUserId:', user?.id, '| first msg senderId:', JSON.stringify(m.senderId));
+        }
         setConversationMessages(payload.messages);
       }
     });
@@ -462,7 +467,9 @@ const FloatingSupportChat: React.FC = () => {
                           ? ((message.senderId as any).id || (message.senderId as any)._id || '')
                           : String(message.senderId);
                         const isCurrentUser = !!(currentUserId && senderIdStr && senderIdStr === currentUserId);
-                        const formattedDate = formatMessageDate(message.timestamp || message.createdAt || new Date().toISOString());
+                        // DEBUG LOG — remove after fix confirmed
+                        console.log('[FloatChat bubble] senderIdStr:', senderIdStr, '| currentUserId:', currentUserId, '| isCurrentUser:', isCurrentUser);
+                        const formattedDate = formatMessageDate(message.timestamp || (message as any).createdAt || new Date().toISOString());
                         const senderName = typeof message.senderId === 'object' && message.senderId?.name 
                           ? message.senderId.name 
                           : 'Support';
