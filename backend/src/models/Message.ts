@@ -58,12 +58,46 @@ const messageSchema = new Schema<IMessage>(
   },
   {
     timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: (_doc, ret) => {
+        // Ensure top-level id is always a string
+        ret.id = ret._id?.toString();
+        // Normalize populated senderId
+        if (ret.senderId && typeof ret.senderId === 'object' && ret.senderId._id) {
+          ret.senderId.id = ret.senderId._id.toString();
+        }
+        // Normalize populated receiverId
+        if (ret.receiverId && typeof ret.receiverId === 'object' && ret.receiverId._id) {
+          ret.receiverId.id = ret.receiverId._id.toString();
+        }
+        return ret;
+      },
+    },
+    toObject: {
+      virtuals: true,
+      transform: (_doc, ret) => {
+        ret.id = ret._id?.toString();
+        if (ret.senderId && typeof ret.senderId === 'object' && ret.senderId._id) {
+          ret.senderId.id = ret.senderId._id.toString();
+        }
+        if (ret.receiverId && typeof ret.receiverId === 'object' && ret.receiverId._id) {
+          ret.receiverId.id = ret.receiverId._id.toString();
+        }
+        return ret;
+      },
+    },
   }
 );
 
 // Index for efficient querying
 messageSchema.index({ conversationId: 1, createdAt: -1 });
 messageSchema.index({ senderId: 1, receiverId: 1 });
+
+// Virtual: expose createdAt as "timestamp" for frontend compatibility
+messageSchema.virtual("timestamp").get(function () {
+  return this.createdAt?.toISOString();
+});
 
 // Generate conversation ID from sender and receiver IDs
 messageSchema.statics.generateConversationId = function (
