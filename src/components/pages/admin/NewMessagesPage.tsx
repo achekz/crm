@@ -692,7 +692,14 @@ const MessagesPage: React.FC = () => {
                 ) : (
                   <>
                     {getConversationMessages().map((message: Message) => {
-                      const isCurrentUser = message.senderId.id === user?.id;
+                      const senderId =
+                        typeof message.senderId === "object"
+                          ? (message.senderId as any).id || (message.senderId as any)._id
+                          : message.senderId;
+                      const currentUserId = user?.id || (() => {
+                        try { return JSON.parse(localStorage.getItem('user') || '{}').id; } catch { return null; }
+                      })();
+                      const isCurrentUser = !!(senderId && currentUserId && senderId === currentUserId);
                       return (
                         <div
                           key={message.id}

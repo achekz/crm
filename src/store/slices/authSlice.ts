@@ -154,10 +154,19 @@ export const updateAvatar = createAsyncThunk(
   }
 );
 
+const storedUser = (() => {
+  try {
+    const str = localStorage.getItem('user');
+    return str ? JSON.parse(str) : null;
+  } catch {
+    return null;
+  }
+})();
+
 const initialState: AuthState = {
-  user: null,
+  user: storedUser,
   token: localStorage.getItem('token'),
-  isAuthenticated: false,
+  isAuthenticated: !!(localStorage.getItem('token') && storedUser),
   loading: false,
   error: null,
 };
