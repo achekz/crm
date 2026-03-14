@@ -1,0 +1,47 @@
+# Robots.txt for cmtaudit.tn
+# Generated: 2026-03-14
+
+# Allow all bots to crawl public pages
+User-agent: *
+Allow: /
+Allow: /admin/
+Allow: /client/
+Allow: /login
+Allow: /register
+Allow: /api-docs
+
+# Disallow sensitive areas
+Disallow: /.env
+Disallow: /.git
+Disallow: /admin/database
+Disallow: /admin/security
+Disallow: /private
+Disallow: /uploads/private
+
+# Disallow API endpoints (they're not meant to be indexed)
+Disallow: /api/
+Disallow: /socket.io/
+
+# Allow important API documentation
+Allow: /api-docs
+Allow: /api-docs/
+
+# Specific bot rules
+User-agent: Googlebot
+Allow: /
+Allow: /api-docs
+Disallow: /api/
+Disallow: /.env
+
+User-agent: Bingbot
+Allow: /
+Allow: /api-docs
+Disallow: /api/
+Disallow: /.env
+
+# Crawl delay (respect server resources)
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://cmtaudit.tn/sitemap.xml
+Sitemap: https://cmtaudit.tn/sitemap-mobile.xml
