@@ -5,7 +5,7 @@ $VPS_HOST = "31.97.38.243"
 $VPS_USER = "root"
 $VPS_PASS = "CmtAudit123456-"
 $APP_DIR = "/var/www/crm"
-$DOMAIN = "cmtaudit.cloud"
+$DOMAIN = "cmtaudit.tn"
 
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "CRM Deployment to Hostinger VPS" -ForegroundColor Cyan

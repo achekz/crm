@@ -3,7 +3,7 @@
 $VPS_HOST = "31.97.38.243"
 $VPS_USER = "root"
 $APP_DIR = "/var/www/crm"
-$DOMAIN = "cmtaudit.cloud"
+$DOMAIN = "cmtaudit.tn"
 
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "Fixing Deployment" -ForegroundColor Cyan

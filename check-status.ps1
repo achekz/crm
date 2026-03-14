@@ -2,7 +2,7 @@
 
 $VPS_HOST = "31.97.38.243"
 $VPS_USER = "root"
-$DOMAIN = "cmtaudit.cloud"
+$DOMAIN = "cmtaudit.tn"
 
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "Checking Deployment Status" -ForegroundColor Cyan
