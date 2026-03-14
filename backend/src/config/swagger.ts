@@ -24,7 +24,7 @@ const options = {
         description: 'Development server'
       },
       {
-        url: 'https://api.crm-system.com',
+        url: 'https://api.cmtaudit.tn',
         description: 'Production server'
       }
     ],
