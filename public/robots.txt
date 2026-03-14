@@ -43,5 +43,6 @@ Disallow: /.env
 Crawl-delay: 1
 
 # Sitemap location
+Sitemap: https://cmtaudit.tn/sitemap-index.xml
 Sitemap: https://cmtaudit.tn/sitemap.xml
 Sitemap: https://cmtaudit.tn/sitemap-mobile.xml

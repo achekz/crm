@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Main Desktop/Desktop Sitemap -->
+  <sitemap>
+    <loc>https://cmtaudit.tn/sitemap.xml</loc>
+    <lastmod>2026-03-14T20:02:00Z</lastmod>
+  </sitemap>
+
+  <!-- Mobile Sitemap -->
+  <sitemap>
+    <loc>https://cmtaudit.tn/sitemap-mobile.xml</loc>
+    <lastmod>2026-03-14T20:04:00Z</lastmod>
+  </sitemap>
+</sitemapindex>
